@@ -1,0 +1,48 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type PushDevice {
+  id: ID!
+  userId: String!
+  playerId: String!
+  deviceType: String!
+  createdAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type NotificationResponse {
+  id: String!
+  recipients: Float!
+}
+
+type Query {
+  hello: String!
+}
+
+type Mutation {
+  registerPushDevice(input: RegisterPushDeviceInput!): PushDevice!
+  sendNotification(notification: SendNotificationDto!): String!
+}
+
+input RegisterPushDeviceInput {
+  playerId: String!
+  deviceType: DeviceType! = WEB
+}
+
+"""The type of device/platform used for push notifications"""
+enum DeviceType {
+  WEB
+  IOS
+  ANDROID
+}
+
+input SendNotificationDto {
+  deviceId: String!
+  title: String!
+  body: String!
+}

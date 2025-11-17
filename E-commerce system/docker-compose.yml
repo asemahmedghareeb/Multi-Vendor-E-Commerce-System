@@ -1,0 +1,41 @@
+services:
+  node-app:
+    container_name: E-commerce-container
+    build: .
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env
+    environment:
+      - DB_HOST=postgres
+    depends_on:
+      - redis
+      - postgres
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    hostname: redis
+    volumes:
+      - redis-db:/data
+
+  postgres:
+    image: postgres:15
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+
+volumes:
+  redis-db:
+  postgres-db:

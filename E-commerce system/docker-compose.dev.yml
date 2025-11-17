@@ -1,0 +1,14 @@
+
+services:
+  node-app:
+    build: 
+      context: .
+      target: development
+    volumes:
+      - ./src:/app/src
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=50
+
+    command: npm run start:dev
