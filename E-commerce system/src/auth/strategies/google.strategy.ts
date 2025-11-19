@@ -4,8 +4,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import googleOauthConfig from '../config/google.oauth.config';
 import type { ConfigType } from '@nestjs/config';
 import { Repository } from 'typeorm';
-import { User } from 'src/auth/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/entities/user.entity';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
@@ -37,14 +37,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     if (user) {
       return done(null, user);
     }
-    const newUser = this.userRepo.create({
-      email: profile.emails[0].value,
-      password: '',
-      role: 'Passenger',
-    });
+    // const newUser = this.userRepo.create({
+    //   email: profile.emails[0].value,
+    //   password: '',
+    //   role: 'Passenger',
+    // });
 
-    const savedUser = await this.userRepo.save(newUser);
+    // const savedUser = await this.userRepo.save(newUser);
 
-    return done(null, savedUser);
+    // return done(null, savedUser);
   }
 }

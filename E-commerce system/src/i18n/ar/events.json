@@ -1,0 +1,83 @@
+{
+    "common": {
+        "SUCCESS": "تمت العملية بنجاح",
+        "ERROR": "حدث خطأ ما",
+        "NOT_FOUND": "المورد غير موجود",
+        "UNAUTHORIZED": "ليس لديك صلاحية للقيام بهذا الإجراء",
+        "FORBIDDEN": "تم رفض الوصول",
+        "VALIDATION_ERROR": "فشل التحقق من البيانات"
+    },
+    "auth": {
+        "LOGIN_SUCCESS": "تم تسجيل الدخول بنجاح",
+        "INVALID_CREDENTIALS": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+        "EMAIL_EXISTS": "البريد الإلكتروني مستخدم بالفعل",
+        "REGISTER_SUCCESS_CLIENT": "تم إنشاء حساب العميل بنجاح",
+        "REGISTER_SUCCESS_VENDOR": "تم إنشاء حساب البائع. يرجى انتظار موافقة المسؤول.",
+        "ACCOUNT_PENDING": "حسابك لا يزال قيد المراجعة",
+        "ACCOUNT_REJECTED": "تم رفض حسابك. يرجى الاتصال بالدعم.",
+        "ACCOUNT_ALREADY_VERIFIED": "تم التحقق من حسابك بالفعل"
+
+        
+    },
+    "vendor": {
+        "APPROVED": "تمت الموافقة على البائع {name} وأصبح حسابه موثقاً",
+        "REJECTED": "تم رفض طلب البائع {name}",
+        "ONLY_VERIFIED": "يمكن للبائعين الموثقين فقط القيام بهذا الإجراء",
+        "NOT_OWNER": "أنت لا تملك هذا المورد",
+        "NOT_FOUND": "البائع غير موجود",
+        "MUST_SUPPLY_BUSINESS_NAME": "يجب تقديم اسم الشركة"
+    },
+    "product": {
+        "CREATED": "تم إنشاء المنتج بنجاح",
+        "UPDATED": "تم تحديث المنتج بنجاح",
+        "DELETED": "تم حذف المنتج بنجاح",
+        "NOT_FOUND": "المنتج غير موجود",
+        "INSUFFICIENT_INVENTORY": "يوجد فقط {count} قطع متوفرة في المخزون",
+        "NOT_OWNER": "أنت لا تملك هذا المورد"
+    },
+    "cart": {
+        "ITEM_ADDED": "تمت إضافة المنتج إلى عربة التسوق",
+        "ITEM_REMOVED": "تمت إزالة المنتج من عربة التسوق",
+        "UPDATED": "تم تحديث عربة التسوق",
+        "EMPTY": "عربة التسوق فارغة"
+    },
+    "order": {
+        "PLACED": "تم تقديم الطلب بنجاح",
+        "STATUS_UPDATED": "تم تحديث حالة الطلب إلى {status}",
+        "CANCELLED": "تم إلغاء الطلب بنجاح",
+        "NOT_FOUND": "الطلب غير موجود"
+    },
+    "payment": {
+        "SUCCESS": "تم الدفع بنجاح",
+        "FAILED": "فشلت عملية الدفع: {reason}",
+        "REFUND_PROCESSED": "تم استرداد مبلغ {amount} بنجاح",
+        "WALLET_DEPOSIT": "تم إيداع {amount} في المحفظة",
+        "WALLET_WITHDRAWAL": "تم البدء في تحويل أرباح بقيمة {amount}",
+        "INSUFFICIENT_FUNDS": "رصيد المحفظة غير كافٍ"
+    },
+    "review": {
+        "ADDED": "تم إرسال التقييم بنجاح",
+        "MUST_BUY_FIRST": "يمكنك تقييم البائعين فقط بعد شراء منتجاتهم",
+        "ALREADY_REVIEWED": "لقد قمت بتقييم هذا الطلب مسبقاً"
+    },
+    "follow": {
+        "FOLLOWED": "أنت تتابع {vendor} الآن",
+        "UNFOLLOWED": "تم إلغاء متابعة {vendor}"
+    },
+    "validation": {
+        "NOT_EMPTY": "لا يمكن ترك حقل {property} فارغاً",
+        "IS_STRING": "يجب أن يكون حقل {property} نصاً",
+        "IS_INT": "يجب أن يكون حقل {property} رقماً صحيحاً",
+        "IS_NUMBER": "يجب أن يكون حقل {property} رقماً",
+        "MIN": "يجب أن تكون قيمة {property} أكبر من أو تساوي {constraint1}",
+        "IS_UUID": "يجب أن يكون حقل {property} معرّف UUID صالح",
+        "IS_EMAIL": "يجب أن يكون البريد الإلكتروني صالحاً",
+        "IS_ARRAY": "يجب أن يكون حقل {property} قائمة (Array)"
+    },
+    "category": {
+        "NOT_FOUND": "القسم غير موجود",
+        "PARENT_NOT_FOUND": "القسم غير موجود",
+        "ALREADY_EXISTS": "القسم موجود بالفعل",
+        "CANNOT_DELETE": "لا يمكن حذف القسم لأنه يحتوي على قسمات أخرى"
+    }
+}

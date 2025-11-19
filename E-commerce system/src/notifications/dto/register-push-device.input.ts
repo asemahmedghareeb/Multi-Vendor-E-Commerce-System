@@ -1,11 +1,11 @@
-import { InputType, Field } from '@nestjs/graphql';
-import { DeviceType } from '../entities/PushDevice.entity';
+// import { InputType, Field } from '@nestjs/graphql';
+// // import { DeviceType } from '../entities/PushDevice.entity';
 
-@InputType()
-export class RegisterPushDeviceInput {
-  @Field()
-  playerId: string;
+// @InputType()
+// export class RegisterPushDeviceInput {
+//   @Field()
+//   playerId: string;
 
-  @Field(() => DeviceType, { defaultValue: DeviceType.WEB })
-  deviceType: DeviceType;
-}
+//   @Field(() => DeviceType, { defaultValue: DeviceType.WEB })
+//   deviceType: DeviceType;
+// }
