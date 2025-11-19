@@ -1,11 +1,7 @@
 import { Resolver, Query, Mutation, Args, Field } from '@nestjs/graphql';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { User } from './entities/user.entity';
 import { AuthService } from './auth.service';
-import { RegisterPassengerInput } from './dto/passenger.dto';
-import { LoginInput } from './dto/loginInput.dto';
 import { AuthResponse } from './dto/loginResponse.dto';
-import { RegisterStaffInput } from './dto/staff.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -16,6 +12,9 @@ import { RegisterResponse } from './dto/registerResponse.dto';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { VerifyOtpInput } from './dto/verifyOtpInput';
 import { ResendOtpInput } from './dto/resendOtpInput';
+import { User } from 'src/users/entities/user.entity';
+import { RegisterInput } from './dto/register.input';
+import { LoginInput } from './dto/login.input';
 
 @ObjectType()
 class Me {
@@ -39,46 +38,36 @@ export class AuthResolver {
   async hello() {
     return 'hello';
   }
-  // @Mutation(() => RegisterResponse, { name: 'registerPassenger' })
-  // async registerPassenger(
-  //   @Args('input') input: RegisterPassengerInput,
-  // ): Promise<RegisterResponse> {
-  //   return this.authService.registerPassenger(input);
-  // }
 
-  // @Mutation(() => RegisterResponse, { name: 'registerStaff' })
-  // async registerStaff(
-  //   @Args('input') input: RegisterStaffInput,
-  // ): Promise<RegisterResponse> {
-  //   return this.authService.registerStaff(input);
-  // }
+  @Mutation(() => User)
+  async register(@Args('input') input: RegisterInput): Promise<User> {
+    return this.authService.register(input);
+  }
 
-  // @Mutation(() => AuthResponse, { name: 'login' })
-  // async login(@Args('input') input: LoginInput): Promise<AuthResponse> {
-  //   return this.authService.login(input);
-  // }
+  @Mutation(() => AuthResponse)
+  async login(@Args('input') input: LoginInput): Promise<AuthResponse> {
+    return this.authService.login(input);
+  }
 
-  // @Mutation(() => AuthResponse, { name: 'refreshToken' })
-  // @UseGuards(RefreshTokenGuard)
-  // async refreshToken(
-  //   @CurrentUser() user: IUser,
-  // ): Promise<AuthResponse> {
-  //   return this.authService.refreshToken(user.userId);
-  // }
+  @Mutation(() => AuthResponse)
+  @UseGuards(RefreshTokenGuard)
+  async refreshToken(@CurrentUser() user: IUser): Promise<AuthResponse> {
+    return this.authService.refreshToken(user.userId);
+  }
 
-  // @Mutation(() => AuthResponse, { name: 'verifyOtp' })
-  // async verifyOtp(
-  //   @Args('input') input: VerifyOtpInput,
-  // ): Promise<AuthResponse> {
-  //   return this.authService.verifyOtp(input);
-  // }
+  @Mutation(() => AuthResponse, { name: 'verifyOtp' })
+  async verifyOtp(
+    @Args('input') input: VerifyOtpInput,
+  ): Promise<AuthResponse> {
+    return this.authService.verifyOtp(input);
+  }
 
-  // @Mutation(() => RegisterResponse, { name: 'resendOtp' })
-  // async resendOtp(
-  //   @Args('input') input: ResendOtpInput,
-  // ): Promise<RegisterResponse> {
-  //   return this.authService.resendOtp(input);
-  // }
+  @Mutation(() => RegisterResponse, { name: 'resendOtp' })
+  async resendOtp(
+    @Args('input') input: ResendOtpInput,
+  ): Promise<RegisterResponse> {
+    return this.authService.resendOtp(input);
+  }
 
   // @UseGuards(AuthGuard)
   // @Query(() => Me, { name: 'me' })

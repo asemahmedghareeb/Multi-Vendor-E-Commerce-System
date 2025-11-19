@@ -9,6 +9,6 @@ export class VerifyOtpInput {
 
   @Field()
   @IsString()
-  @Length(6, 6) // Assuming a 6-digit OTP
+  @Length(4)
   otp: string;
 }

@@ -6,9 +6,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
-import { User } from './auth/entities/user.entity';
+import { User } from './users/entities/user.entity';
 import { PushNotificationsModule } from './notifications/push-notifications.module';
-import { PushDevice } from './notifications/entities/PushDevice.entity';
+// import { PushDevice } from './notifications/entities/PushDevice.entity';
 import { EmailsModule } from './emails/emails.module';
 import { BullModule } from '@nestjs/bull';
 import { DataLoadersModule } from './dataLoaders/dataLoaders.module';
@@ -19,11 +19,34 @@ import { DataSource } from 'typeorm';
 import { PubSubModule } from './pubsub/pubsub.module';
 import { FcmModule } from './fcm/fcm.module';
 import { ProductsModule } from './products/products.module';
-import { PaymentsModule } from './payments/payments.module'; 
+import { PaymentsModule } from './payments/payments.module';
 import { OrdersModule } from './orders/orders.module';
 import { UsersModule } from './users/users.module';
+import { Vendor } from './users/entities/vendor.entity';
+import { Product } from './products/entities/product.entity';
+import { Category } from './categories/entities/category.entity';
+import { CategoriesModule } from './categories/categories.module';
+import {
+  AcceptLanguageResolver,
+  I18nModule,
+  QueryResolver,
+  HeaderResolver,
+} from 'nestjs-i18n';
+import * as path from 'path';
 @Module({
   imports: [
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [
+        { use: QueryResolver, options: ['lang'] },
+        new HeaderResolver(['x-custom-lang']),
+        AcceptLanguageResolver,
+      ],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -54,7 +77,10 @@ import { UsersModule } from './users/users.module';
           //  logging: true
           entities: [
             User,
-            PushDevice,
+            Vendor,
+            Product,
+            Category,
+            // PushDevice,
           ],
         };
       },
@@ -67,7 +93,6 @@ import { UsersModule } from './users/users.module';
       },
     }),
 
-
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -76,6 +101,52 @@ import { UsersModule } from './users/users.module';
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
       subscriptions: {
         'graphql-ws': true,
+      },
+ 
+      formatError: (formattedError, error: any) => {
+        const graphQLError = error;
+        const originalError = graphQLError.originalError;
+
+        if (originalError && (originalError as any).errors) {
+          const validationErrors = (originalError as any).errors;
+
+          const messages = validationErrors.map((err: any) =>
+            typeof err === 'string'
+              ? err
+              : Object.values(err.constraints || {})[0],
+          );
+
+          return {
+            message: messages[0] || 'Validation Error',
+            allMessages: messages,
+            statusCode: 400,
+            error: 'Bad Request',
+            path: formattedError.path,
+          };
+        }
+
+        // if (originalError && (originalError as any).response) {
+        //   const response = (originalError as any).response;
+        //   const statusCode = response.statusCode || 400;
+
+        //   const msg = Array.isArray(response.message)
+        //     ? response.message[0]
+        //     : response.message;
+
+        //   return {
+        //     message: msg,
+        //     allMessages: response.message,
+        //     statusCode: statusCode,
+        //     error: response.error || 'Bad Request',
+        //     path: formattedError.path,
+        //   };
+        // }
+
+        return {
+          message: formattedError.message,
+          code: formattedError.extensions?.code,
+          path: formattedError.path,
+        };
       },
     }),
 
@@ -101,7 +172,7 @@ import { UsersModule } from './users/users.module';
     PaymentsModule,
     OrdersModule,
     UsersModule,
+    CategoriesModule,
   ],
- 
 })
 export class AppModule {}

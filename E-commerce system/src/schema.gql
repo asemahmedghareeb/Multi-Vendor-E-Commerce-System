@@ -2,12 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type PushDevice {
+type Vendor {
   id: ID!
-  userId: String!
-  playerId: String!
-  deviceType: String!
   createdAt: DateTime!
+  updatedAt: DateTime!
+  businessName: String!
+  bio: String!
+  status: String!
+  commissionRate: Float!
+  user: User!
 }
 
 """
@@ -15,34 +18,168 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type NotificationResponse {
-  id: String!
-  recipients: Float!
+type User {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  email: String!
+  role: UserRole!
+  vendorProfile: Vendor
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  VENDOR
+  CLIENT
+}
+
+type AuthResponse {
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+}
+
+type RegisterResponse {
+  msg: String!
+}
+
+type Category {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  parent: Category
+  children: [Category!]
+}
+
+type Product {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  description: String!
+  price: Float!
+  inventoryCount: Int!
+  images: [String!]
+  vendor: Vendor!
+  category: Category!
+}
+
+type PaginatedProductOutput {
+  """The list of items on this page."""
+  items: [Product!]!
+
+  """The total number of items in the collection."""
+  totalItems: Int!
+
+  """The total number of pages."""
+  totalPages: Int!
+}
+
+type PaginatedCategoryOutput {
+  """The list of items on this page."""
+  items: [Category!]!
+
+  """The total number of items in the collection."""
+  totalItems: Int!
+
+  """The total number of pages."""
+  totalPages: Int!
 }
 
 type Query {
   hello: String!
+  products(filter: GetProductsFilterInput): PaginatedProductOutput!
+  product(id: String!): Product!
+  categories(pagination: PaginationInput): PaginatedCategoryOutput!
+  category(id: String!): Category!
+}
+
+input GetProductsFilterInput {
+  page: Int! = 1
+  limit: Int! = 10
+  search: String
+  categoryId: Int
+  categoryName: String
+  minPrice: Float
+  maxPrice: Float
+}
+
+input PaginationInput {
+  page: Int! = 1
+  limit: Int! = 10
 }
 
 type Mutation {
-  registerPushDevice(input: RegisterPushDeviceInput!): PushDevice!
+  register(input: RegisterInput!): User!
+  login(input: LoginInput!): AuthResponse!
+  refreshToken: AuthResponse!
+  verifyOtp(input: VerifyOtpInput!): AuthResponse!
+  resendOtp(input: ResendOtpInput!): RegisterResponse!
   sendNotification(notification: SendNotificationDto!): String!
+  createProduct(createProductInput: CreateProductInput!): Product!
+  updateProduct(updateProductInput: UpdateProductInput!): Product!
+  removeProduct(id: String!): Boolean!
+  approveVendor(userId: String!): Vendor!
+  createCategory(createCategoryInput: CreateCategoryInput!): Category!
+  updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
+  removeCategory(id: String!): Boolean!
 }
 
-input RegisterPushDeviceInput {
-  playerId: String!
-  deviceType: DeviceType! = WEB
+input RegisterInput {
+  email: String!
+  password: String!
+  role: UserRole = CLIENT
+  businessName: String
+  bio: String
 }
 
-"""The type of device/platform used for push notifications"""
-enum DeviceType {
-  WEB
-  IOS
-  ANDROID
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input VerifyOtpInput {
+  email: String!
+  otp: String!
+}
+
+input ResendOtpInput {
+  email: String!
 }
 
 input SendNotificationDto {
   deviceId: String!
   title: String!
   body: String!
+}
+
+input CreateProductInput {
+  name: String!
+  description: String!
+  price: Float!
+  inventoryCount: Int!
+  categoryId: String!
+  images: [String!]
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  price: Float
+  inventoryCount: Int
+  categoryId: String
+  images: [String!]
+  id: String!
+}
+
+input CreateCategoryInput {
+  name: String!
+  parentId: String
+}
+
+input UpdateCategoryInput {
+  name: String
+  parentId: String
+  id: String!
 }
