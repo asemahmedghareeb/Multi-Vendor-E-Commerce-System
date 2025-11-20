@@ -14,7 +14,14 @@
         "REGISTER_SUCCESS_CLIENT": "Client account created successfully",
         "REGISTER_SUCCESS_VENDOR": "Vendor account created. Please wait for admin approval.",
         "ACCOUNT_PENDING": "Your account is still pending approval",
-        "ACCOUNT_REJECTED": "Your account has been rejected. Please contact support."
+        "ACCOUNT_REJECTED": "Your account has been rejected. Please contact support.",
+        "ACCOUNT_ALREADY_VERIFIED": "Your account is already verified",
+        "EXPIRED_OTP": "OTP has expired.",
+        "USER_NOT_FOUND": "User not found",
+        "EMAIL_NOT_FOUND": "Email not found",
+        "INVALID_OTP": "Invalid OTP",
+        "INVALID_GOOGLE_CODE": "Invalid Google Code",
+        "ACCOUNT_NOT_VERIFIED": "Account not verified. Please check your email for an OTP."
     },
     "vendor": {
         "APPROVED": "Vendor {name} has been approved and is now Verified",
@@ -37,7 +44,8 @@
         "ITEM_ADDED": "Item added to cart",
         "ITEM_REMOVED": "Item removed from cart",
         "UPDATED": "Cart updated successfully",
-        "EMPTY": "Cart is empty"
+        "EMPTY": "Cart is empty",
+        "ITEM_NOT_FOUND": "The item doesn't exist in the Cart"
     },
     "order": {
         "PLACED": "Order placed successfully",
@@ -67,10 +75,10 @@
         "IS_STRING": "Field {property} must be a string",
         "IS_INT": "Field {property} must be an integer number",
         "IS_NUMBER": "Field {property} must be a number",
-        "MIN": "Field {property} must be greater than or equal to {constraint1}",
         "IS_UUID": "Field {property} must be a valid UUID",
+        "IS_ARRAY": "Field {property} must be an array",
         "IS_EMAIL": "Field {property} must be a valid email address",
-        "IS_ARRAY": "Field {property} must be an array"
+        "MIN": "Field {property} must be at least {constraint1} characters long"
     },
     "category": {
         "NOT_FOUND": "Category not found",

@@ -1,7 +1,8 @@
-import { Entity, Column, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, OneToOne, JoinColumn, RelationId } from 'typeorm';
 import { ObjectType, Field, Float } from '@nestjs/graphql';
 import { BaseEntity } from '../../common/entities/base.entity';
-import { User } from './user.entity';
+import { User } from 'src/users/entities/user.entity';
+
 
 export enum VendorStatus {
   PENDING = 'PENDING',
@@ -28,8 +29,14 @@ export class Vendor extends BaseEntity {
   @Column({ type: 'decimal', precision: 5, scale: 2, default: 10.0 })
   commissionRate: number;
 
+
   @Field(() => User)
   @OneToOne(() => User, (user) => user.vendorProfile)
-  @JoinColumn() 
+  @JoinColumn({ name: 'userId' }) // Best practice: Explicitly name the DB column
   user: User;
+
+
+  // @Field() 
+  @RelationId((vendor: Vendor) => vendor.user)
+  userId: string;
 }

@@ -1,4 +1,4 @@
-import { Role } from 'src/auth/role.enum';
+import { Role } from 'src/auth/enums/role.enum';
 import {
   Injectable,
   BadRequestException,
@@ -15,12 +15,12 @@ import { VerifyOtpInput } from './dto/verifyOtpInput';
 import { EmailsService } from 'src/emails/emails.service';
 import { ResendOtpInput } from './dto/resendOtpInput';
 import { OAuth2Client } from 'google-auth-library';
-import { User } from 'src/users/entities/user.entity';
 import { RegisterInput } from './dto/register.input';
-import { Vendor, VendorStatus } from 'src/users/entities/vendor.entity';
+import { Vendor, VendorStatus } from 'src/vendors/entities/vendor.entity';
 import { UserRole } from 'src/common/enums/roles.enum';
 import { LoginInput } from './dto/login.input';
 import { I18nContext, I18nService } from 'nestjs-i18n';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -60,11 +60,12 @@ export class AuthService {
     savedUser.otpExpires = expires;
     await this.userRepo.save(savedUser);
     await this.emailService.sendEmail(input.email, 'Verify OTP', otp);
-    console.log(`OTP for ${input.email}: ${otp}`);
 
     if (input.role === UserRole.VENDOR) {
       if (!input.businessName)
-        throw new BadRequestException(this.i18n.t('events.auth.MUST_SUPPLY_BUSINESS_NAME'));
+        throw new BadRequestException(
+          this.i18n.t('events.auth.MUST_SUPPLY_BUSINESS_NAME'),
+        );
 
       const vendor = this.vendorRepo.create({
         businessName: input.businessName,
@@ -72,6 +73,7 @@ export class AuthService {
         status: VendorStatus.PENDING,
         user: savedUser,
       });
+
       await this.vendorRepo.save(vendor);
     }
 
@@ -81,12 +83,14 @@ export class AuthService {
   async login(input: LoginInput) {
     const user = await this.userRepo.findOne({ where: { email: input.email } });
     if (!user || !(await bcrypt.compare(input.password, user.password))) {
-      throw new UnauthorizedException(this.i18n.t('events.auth.INVALID_CREDENTIALS'));
+      throw new UnauthorizedException(
+        this.i18n.t('events.auth.INVALID_CREDENTIALS'),
+      );
     }
 
     if (!user.isVerified) {
       throw new UnauthorizedException(
-        'Account not verified. Please check your email for an OTP.',
+        this.i18n.t('events.auth.ACCOUNT_NOT_VERIFIED'),
       );
     }
 
@@ -127,7 +131,7 @@ export class AuthService {
 
       const payload = ticket.getPayload();
       if (!payload) {
-        throw new UnauthorizedException('Invalid Google Code');
+        throw new UnauthorizedException(this.i18n.t('events.auth.INVALID_GOOGLE_CODE'));
       }
 
       return {
@@ -138,7 +142,7 @@ export class AuthService {
       };
     } catch (error) {
       console.error('Google Exchange Error:', error);
-      throw new UnauthorizedException('Invalid Google Code');
+      throw new UnauthorizedException(this.i18n.t('events.auth.INVALID_GOOGLE_CODE'));
     }
   }
 
@@ -149,16 +153,18 @@ export class AuthService {
     const user: User | null = await this.userRepo.findOne({ where: { email } });
 
     if (!user) {
-      throw new BadRequestException("Invalid email or OTP.");
+      throw new BadRequestException(this.i18n.t('events.auth.USER_NOT_FOUND'));
     }
     if (user.isVerified) {
-      throw new BadRequestException(this.i18n.t('events.auth.ACCOUNT_ALREADY_VERIFIED'));
+      throw new BadRequestException(
+        this.i18n.t('events.auth.ACCOUNT_ALREADY_VERIFIED'),
+      );
     }
     if (user.otp !== otp) {
-      throw new BadRequestException("Invalid email or OTP.");
+      throw new BadRequestException(this.i18n.t('events.auth.INVALID_OTP'));
     }
     if (new Date() > user.otpExpires!) {
-      throw new BadRequestException('OTP has expired.');
+      throw new BadRequestException(this.i18n.t('events.auth.EXPIRED_OTP'));
     }
 
     user.isVerified = true;
@@ -171,10 +177,12 @@ export class AuthService {
     const user = await this.userRepo.findOne({ where: { email } });
 
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException(this.i18n.t('events.auth.NOT_FOUND'));
     }
     if (user.isVerified) {
-      throw new BadRequestException('Account already verified.');
+      throw new BadRequestException(
+        this.i18n.t('events.auth.ACCOUNT_ALREADY_VERIFIED'),
+      );
     }
 
     const { otp, expires } = this.generateOtp();
@@ -215,7 +223,7 @@ export class AuthService {
   async refreshToken(userId: string): Promise<AuthResponse> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException(this.i18n.t('events.auth.USER_NOT_FOUND'));
     }
     const { accessToken, refreshToken } = await this.generateTokens(user);
     return { accessToken, refreshToken };

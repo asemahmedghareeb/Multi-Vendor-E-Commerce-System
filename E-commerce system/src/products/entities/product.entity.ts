@@ -1,7 +1,7 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index, RelationId } from 'typeorm';
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { BaseEntity } from '../../common/entities/base.entity';
-import { Vendor } from '../../users/entities/vendor.entity';
+import { Vendor } from '../../vendors/entities/vendor.entity';
 import { Category } from '../../categories/entities/category.entity';
 
 @ObjectType()
@@ -30,26 +30,25 @@ export class Product extends BaseEntity {
   @Column({ type: 'int', default: 0 })
   inventoryCount: number;
 
-
   @Field(() => [String], { nullable: true })
   @Column('text', { array: true, default: [] })
   images: string[];
 
-
-  @Field(()=>Vendor)
-  @ManyToOne(()=>Vendor)
-  @JoinColumn({name:'vendor_id'})
-  vendor:Vendor
-
+  
+  @Field(() => Vendor)
+  @ManyToOne(() => Vendor)
+  @JoinColumn({ name: 'vendorId' })
+  vendor: Vendor;
+  
+  @RelationId((product: Product) => product.vendor)
   vendorId: string;
 
- @Field(() => Category)
-  @ManyToOne(() => Category, (category) => category.products)
-  @JoinColumn({ name: 'category_id' })
-  category: Category;
   
+  @Field(() => Category)
+  @ManyToOne(() => Category, (category) => category.products)
+  @JoinColumn({ name: 'categoryId' })
+  category: Category;
 
-  categoryId: string; 
-
-
+  @RelationId((product: Product) => product.category)
+  categoryId: string;
 }

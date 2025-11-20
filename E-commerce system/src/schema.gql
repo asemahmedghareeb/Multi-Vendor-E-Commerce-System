@@ -2,6 +2,26 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type User {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  email: String!
+  role: UserRole!
+  vendorProfile: Vendor
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum UserRole {
+  SUPER_ADMIN
+  VENDOR
+  CLIENT
+}
+
 type Vendor {
   id: ID!
   createdAt: DateTime!
@@ -13,26 +33,6 @@ type Vendor {
   user: User!
 }
 
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
-type User {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  email: String!
-  role: UserRole!
-  vendorProfile: Vendor
-}
-
-enum UserRole {
-  SUPER_ADMIN
-  VENDOR
-  CLIENT
-}
-
 type AuthResponse {
   accessToken: String!
   refreshToken: String!
@@ -41,15 +41,6 @@ type AuthResponse {
 
 type RegisterResponse {
   msg: String!
-}
-
-type Category {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  name: String!
-  parent: Category
-  children: [Category!]
 }
 
 type Product {
@@ -65,34 +56,59 @@ type Product {
   category: Category!
 }
 
+type Category {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  parent: Category
+  children: [Category!]
+}
+
 type PaginatedProductOutput {
-  """The list of items on this page."""
   items: [Product!]!
-
-  """The total number of items in the collection."""
   totalItems: Int!
-
-  """The total number of pages."""
   totalPages: Int!
 }
 
 type PaginatedCategoryOutput {
-  """The list of items on this page."""
   items: [Category!]!
-
-  """The total number of items in the collection."""
   totalItems: Int!
-
-  """The total number of pages."""
   totalPages: Int!
 }
 
+type PaginatedUserOutput {
+  items: [User!]!
+  totalItems: Int!
+  totalPages: Int!
+}
+
+type CartItem {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  quantity: Int!
+  product: Product!
+  productId: String!
+}
+
+type Cart {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User!
+  items: [CartItem!]!
+}
+
 type Query {
-  hello: String!
   products(filter: GetProductsFilterInput): PaginatedProductOutput!
   product(id: String!): Product!
   categories(pagination: PaginationInput): PaginatedCategoryOutput!
   category(id: String!): Category!
+  users(pagination: PaginationInput): PaginatedUserOutput!
+  user(id: String!): User!
+  me: User!
+  myCart: Cart!
 }
 
 input GetProductsFilterInput {
@@ -124,6 +140,11 @@ type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   removeCategory(id: String!): Boolean!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  removeUser(id: String!): Boolean!
+  addToCart(input: AddToCartInput!): Cart!
+  updateCartItem(input: UpdateCartItemInput!): Cart!
+  removeFromCart(cartItemId: String!): Cart!
 }
 
 input RegisterInput {
@@ -182,4 +203,19 @@ input UpdateCategoryInput {
   name: String
   parentId: String
   id: String!
+}
+
+input UpdateUserInput {
+  email: String
+  password: String
+}
+
+input AddToCartInput {
+  productId: String!
+  quantity: Int!
+}
+
+input UpdateCartItemInput {
+  cartItemId: String!
+  quantity: Int!
 }

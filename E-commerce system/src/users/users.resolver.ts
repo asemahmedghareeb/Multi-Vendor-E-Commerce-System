@@ -1,21 +1,70 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { UsersService } from './users.service';
-import { Role } from 'src/auth/role.enum';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { Vendor, VendorStatus } from './entities/vendor.entity';
-
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-
-import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UsersService } from './users.service';
+import { User } from './entities/user.entity';
+import { PaginationInput } from '../common/dto/pagination.input';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-@Resolver()
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Role } from 'src/auth/enums/role.enum';
+import { Vendor } from 'src/vendors/entities/vendor.entity';
+import { genericPaginated } from 'src/common/dto/paginated-output';
+import { UpdateUserInput } from './dto/updated-user.dto';
+
+const paginatedCategory = genericPaginated(User);
+@Resolver(() => User)
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
-  @Mutation(() => Vendor)
+  @Query(() => paginatedCategory, { name: 'users' })
   @Roles(Role.SUPER_ADMIN)
   @UseGuards(AuthGuard, RolesGuard)
-  async approveVendor(@Args('userId') userId: string) {
-    return this.usersService.updateVendorStatus(userId, VendorStatus.VERIFIED);
+  async findAll(
+    @Args('pagination', { nullable: true }) pagination?: PaginationInput,
+  ) {
+    return this.usersService.findAll(pagination || { page: 1, limit: 10 });
+  }
+
+  @Query(() => User, { name: 'user' })
+  @Roles(Role.SUPER_ADMIN)
+  @UseGuards(AuthGuard, RolesGuard)
+  async findOne(@Args('id') id: string) {
+    return this.usersService.findOne(id);
+  }
+
+  @Query(() => User, { name: 'me' })
+  @UseGuards(AuthGuard)
+  async me(@CurrentUser() user: User) {
+    return this.usersService.findOne(user.id);
+  }
+
+  @Mutation(() => User)
+  @UseGuards(AuthGuard)
+  async updateUser(
+    @Args('updateUserInput') input: UpdateUserInput,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.usersService.update(currentUser.id, input);
+  }
+
+  @Mutation(() => Boolean)
+  @Roles(Role.SUPER_ADMIN)
+  @UseGuards(AuthGuard, RolesGuard)
+  async removeUser(@Args('id') id: string) {
+    return this.usersService.remove(id);
+  }
+
+  @ResolveField(() => Vendor, { nullable: true })
+  async vendorProfile(@Parent() user: User) {
+    if (user.vendorProfile) return user.vendorProfile;
+    return null;
   }
 }

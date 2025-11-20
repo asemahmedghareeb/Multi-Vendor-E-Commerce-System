@@ -1,20 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 import DataLoader from 'dataloader';
-import { Scope } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
-import { User } from 'src/auth/entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
+
+
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserLoader {
-  constructor(private readonly authService: AuthService) {}
+  constructor(@InjectRepository(User) private readonly userRepo: Repository<User>) {}
 
-  readonly userById = new DataLoader<string, User>(
-    async (userIds: string[]) => {
-      const users = await this.authService.findByIds(userIds);
-
-      const userMap = new Map(users.map((user) => [user.id, user]));
-
-      return userIds.map((id) => userMap.get(id) as User);
-    },
-  );
+  public readonly batchUsers = new DataLoader<string, User>(async (ids) => {
+    const users = await this.userRepo.findBy({ id: In(ids) });
+    const map = new Map(users.map((user) => [user.id, user]));
+    return ids.map((id) => map.get(id) || new Error(`User ${id} not found`));
+  });
 }
