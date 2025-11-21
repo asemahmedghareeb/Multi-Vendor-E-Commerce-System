@@ -15,7 +15,6 @@
         "REGISTER_SUCCESS_VENDOR": "تم إنشاء حساب البائع. يرجى انتظار موافقة المسؤول.",
         "ACCOUNT_PENDING": "حسابك لا يزال قيد المراجعة",
         "ACCOUNT_REJECTED": "تم رفض حسابك. يرجى الاتصال بالدعم.",
-<<<<<<< HEAD
         "ACCOUNT_ALREADY_VERIFIED": "تم التحقق من حسابك بالفعل",
         "USER_NOT_FOUND": "المستخدم غير موجود",
         "EMAIL_NOT_FOUND": "البريد الإلكتروني غير موجود",
@@ -23,11 +22,6 @@
         "INVALID_OTP": "Invalid OTP",
         "INVALID_GOOGLE_CODE": "Invalid Google Code",
         "ACCOUNT_NOT_VERIFIED": "Account not verified. Please check your email for an OTP."
-=======
-        "ACCOUNT_ALREADY_VERIFIED": "تم التحقق من حسابك بالفعل"
-
-        
->>>>>>> main
     },
     "vendor": {
         "APPROVED": "تمت الموافقة على البائع {name} وأصبح حسابه موثقاً",
@@ -35,12 +29,8 @@
         "ONLY_VERIFIED": "يمكن للبائعين الموثقين فقط القيام بهذا الإجراء",
         "NOT_OWNER": "أنت لا تملك هذا المورد",
         "NOT_FOUND": "البائع غير موجود",
-<<<<<<< HEAD
         "MUST_SUPPLY_BUSINESS_NAME": "يجب تقديم اسم الشركة",
         "ALREADY_VERIFIED": "تم التحقق من حسابك بالفعل"
-=======
-        "MUST_SUPPLY_BUSINESS_NAME": "يجب تقديم اسم الشركة"
->>>>>>> main
     },
     "product": {
         "CREATED": "تم إنشاء المنتج بنجاح",
@@ -54,12 +44,8 @@
         "ITEM_ADDED": "تمت إضافة المنتج إلى عربة التسوق",
         "ITEM_REMOVED": "تمت إزالة المنتج من عربة التسوق",
         "UPDATED": "تم تحديث عربة التسوق",
-<<<<<<< HEAD
         "EMPTY": "عربة التسوق فارغة",
         "ITEM_NOT_FOUND":"السلعة غير موجودة في عربة التسوق"
-=======
-        "EMPTY": "عربة التسوق فارغة"
->>>>>>> main
     },
     "order": {
         "PLACED": "تم تقديم الطلب بنجاح",

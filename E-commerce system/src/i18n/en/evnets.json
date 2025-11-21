@@ -14,7 +14,6 @@
         "REGISTER_SUCCESS_CLIENT": "Client account created successfully",
         "REGISTER_SUCCESS_VENDOR": "Vendor account created. Please wait for admin approval.",
         "ACCOUNT_PENDING": "Your account is still pending approval",
-<<<<<<< HEAD
         "ACCOUNT_REJECTED": "Your account has been rejected. Please contact support.",
         "ACCOUNT_ALREADY_VERIFIED": "Your account is already verified",
         "EXPIRED_OTP": "OTP has expired.",
@@ -23,9 +22,6 @@
         "INVALID_OTP": "Invalid OTP",
         "INVALID_GOOGLE_CODE": "Invalid Google Code",
         "ACCOUNT_NOT_VERIFIED": "Account not verified. Please check your email for an OTP."
-=======
-        "ACCOUNT_REJECTED": "Your account has been rejected. Please contact support."
->>>>>>> main
     },
     "vendor": {
         "APPROVED": "Vendor {name} has been approved and is now Verified",
@@ -48,12 +44,8 @@
         "ITEM_ADDED": "Item added to cart",
         "ITEM_REMOVED": "Item removed from cart",
         "UPDATED": "Cart updated successfully",
-<<<<<<< HEAD
         "EMPTY": "Cart is empty",
         "ITEM_NOT_FOUND": "The item doesn't exist in the Cart"
-=======
-        "EMPTY": "Cart is empty"
->>>>>>> main
     },
     "order": {
         "PLACED": "Order placed successfully",
@@ -83,17 +75,10 @@
         "IS_STRING": "Field {property} must be a string",
         "IS_INT": "Field {property} must be an integer number",
         "IS_NUMBER": "Field {property} must be a number",
-<<<<<<< HEAD
         "IS_UUID": "Field {property} must be a valid UUID",
         "IS_ARRAY": "Field {property} must be an array",
         "IS_EMAIL": "Field {property} must be a valid email address",
         "MIN": "Field {property} must be at least {constraint1} characters long"
-=======
-        "MIN": "Field {property} must be greater than or equal to {constraint1}",
-        "IS_UUID": "Field {property} must be a valid UUID",
-        "IS_EMAIL": "Field {property} must be a valid email address",
-        "IS_ARRAY": "Field {property} must be an array"
->>>>>>> main
     },
     "category": {
         "NOT_FOUND": "Category not found",
