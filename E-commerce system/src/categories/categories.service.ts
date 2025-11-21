@@ -52,7 +52,11 @@ export class CategoriesService {
     const [items, totalItems] = await this.categoryRepo.findAndCount({
       where: { parent: IsNull() },
       order: { createdAt: 'DESC' },
+<<<<<<< HEAD
+      // relations: ['children'],
+=======
       relations: ['children'],
+>>>>>>> main
       skip,
       take: limit,
     });
@@ -67,7 +71,11 @@ export class CategoriesService {
   async findOne(id: string): Promise<Category> {
     const category = await this.categoryRepo.findOne({
       where: { id },
+<<<<<<< HEAD
+      // relations: ['children'],
+=======
       relations: ['children', 'parent'],
+>>>>>>> main
     });
 
     if (!category) {
@@ -90,7 +98,11 @@ export class CategoriesService {
         throw new NotFoundException(
           this.i18n.t('events.category.PARENT_NOT_FOUND'),
         );
+<<<<<<< HEAD
+      } 
+=======
       }
+>>>>>>> main
       category.parent = parent;
     }
 

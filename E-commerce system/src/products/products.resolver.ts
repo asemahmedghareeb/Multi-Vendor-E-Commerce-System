@@ -1,9 +1,17 @@
+<<<<<<< HEAD
+import { VendorLoader } from '../dataLoaders/vendor.loader';
+import { Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { ProductsService } from './products.service';
+import { Mutation, Args } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+=======
 import { Query, Resolver } from '@nestjs/graphql';
 import { ProductsService } from './products.service';
 import { Mutation, Args } from '@nestjs/graphql';
 import {
   UseGuards, 
 } from '@nestjs/common';
+>>>>>>> main
 import { Product } from './entities/product.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -12,10 +20,25 @@ import { genericPaginated } from 'src/common/dto/paginated-output';
 
 import { UpdateProductInput } from './dto/update-product.input';
 import { GetProductsFilterInput } from './dto/products-filter.input';
+<<<<<<< HEAD
+import { Vendor } from 'src/vendors/entities/vendor.entity';
+import { Category } from 'src/categories/entities/category.entity';
+import { CategoryLoader } from 'src/dataLoaders/category.loader';
+
+const paginatedProduct = genericPaginated(Product);
+@Resolver(() => Product)
+export class ProductsResolver {
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly vendorLoader: VendorLoader,
+    private readonly categoryLoader: CategoryLoader,
+  ) {}
+=======
 const paginatedProduct = genericPaginated(Product);
 @Resolver()
 export class ProductsResolver {
   constructor(private readonly productsService: ProductsService) {}
+>>>>>>> main
 
   @Mutation(() => Product)
   @UseGuards(AuthGuard)
@@ -56,4 +79,19 @@ export class ProductsResolver {
   ) {
     return this.productsService.remove(user.id, user.role, id);
   }
+<<<<<<< HEAD
+
+  @ResolveField(() => Vendor)
+  async vendor(@Parent() product: Product) {
+    if (product.vendor) return product.vendor;
+    return this.vendorLoader.batchVendors.load(product.vendorId);
+  }
+
+  @ResolveField(() => Category)
+  async category(@Parent() product: Product) {
+    if (product.category) return product.category;
+    return this.categoryLoader.batchCategories.load(product.categoryId);
+  }
+=======
+>>>>>>> main
 }

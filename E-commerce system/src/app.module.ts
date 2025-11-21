@@ -6,9 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
-import { User } from './users/entities/user.entity';
 import { PushNotificationsModule } from './notifications/push-notifications.module';
-// import { PushDevice } from './notifications/entities/PushDevice.entity';
 import { EmailsModule } from './emails/emails.module';
 import { BullModule } from '@nestjs/bull';
 import { DataLoadersModule } from './dataLoaders/dataLoaders.module';
@@ -21,8 +19,8 @@ import { FcmModule } from './fcm/fcm.module';
 import { ProductsModule } from './products/products.module';
 import { PaymentsModule } from './payments/payments.module';
 import { OrdersModule } from './orders/orders.module';
-import { UsersModule } from './users/users.module';
-import { Vendor } from './users/entities/vendor.entity';
+import { vendorsModule } from './vendors/vendors.module';
+import { Vendor } from './vendors/entities/vendor.entity';
 import { Product } from './products/entities/product.entity';
 import { Category } from './categories/entities/category.entity';
 import { CategoriesModule } from './categories/categories.module';
@@ -32,7 +30,14 @@ import {
   QueryResolver,
   HeaderResolver,
 } from 'nestjs-i18n';
+import { UsersModule } from './users/users.module';
 import * as path from 'path';
+import { User } from './users/entities/user.entity';
+import { CartModule } from './cart/cart.module';
+import { Cart } from './cart/entities/cart.entity';
+import { CartItem } from './cart/entities/cart-item.entity';
+import { APP_FILTER } from '@nestjs/core';
+import { I18nExceptionFilter } from './common/filters/i18n-exception.filter';
 @Module({
   imports: [
     I18nModule.forRoot({
@@ -80,6 +85,8 @@ import * as path from 'path';
             Vendor,
             Product,
             Category,
+            Cart,
+            CartItem,
             // PushDevice,
           ],
         };
@@ -102,7 +109,7 @@ import * as path from 'path';
       subscriptions: {
         'graphql-ws': true,
       },
- 
+
       formatError: (formattedError, error: any) => {
         const graphQLError = error;
         const originalError = graphQLError.originalError;
@@ -125,22 +132,22 @@ import * as path from 'path';
           };
         }
 
-        // if (originalError && (originalError as any).response) {
-        //   const response = (originalError as any).response;
-        //   const statusCode = response.statusCode || 400;
+        if (originalError && (originalError as any).response) {
+          const response = (originalError as any).response;
+          const statusCode = response.statusCode || 400;
 
-        //   const msg = Array.isArray(response.message)
-        //     ? response.message[0]
-        //     : response.message;
+          const msg = Array.isArray(response.message)
+            ? response.message[0]
+            : response.message;
 
-        //   return {
-        //     message: msg,
-        //     allMessages: response.message,
-        //     statusCode: statusCode,
-        //     error: response.error || 'Bad Request',
-        //     path: formattedError.path,
-        //   };
-        // }
+          return {
+            message: msg,
+            allMessages: response.message,
+            statusCode: statusCode,
+            error: response.error || 'Bad Request',
+            path: formattedError.path,
+          };
+        }
 
         return {
           message: formattedError.message,
@@ -171,8 +178,10 @@ import * as path from 'path';
     ProductsModule,
     PaymentsModule,
     OrdersModule,
-    UsersModule,
+    vendorsModule,
     CategoriesModule,
+    UsersModule,
+    CartModule,
   ],
 })
 export class AppModule {}

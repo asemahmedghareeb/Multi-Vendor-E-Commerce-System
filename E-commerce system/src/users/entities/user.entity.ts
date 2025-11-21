@@ -2,7 +2,8 @@ import { Entity, Column, OneToOne } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { UserRole } from '../../common/enums/roles.enum';
-import { Vendor } from './vendor.entity'; // We will create this next
+import { Vendor } from 'src/vendors/entities/vendor.entity';
+
 
 
 @ObjectType()

@@ -7,18 +7,18 @@ export interface IPaginatedType<T> {
   totalPages: number;
 }
 
-export function genericPaginated<T>(classRef: Type<T>): Type<IPaginatedType<T>> {
+export function genericPaginated<T>(
+  classRef: Type<T>,
+): Type<IPaginatedType<T>> {
   @ObjectType(`Paginated${classRef.name}Output`)
   abstract class PaginatedType implements IPaginatedType<T> {
-    @Field(() => [classRef], { description: 'The list of items on this page.' })
+    @Field(() => [classRef])
     items: T[];
 
-    @Field(() => Int, {
-      description: 'The total number of items in the collection.',
-    })
+    @Field(() => Int)
     totalItems: number;
 
-    @Field(() => Int, { description: 'The total number of pages.' })
+    @Field(() => Int)
     totalPages: number;
   }
 

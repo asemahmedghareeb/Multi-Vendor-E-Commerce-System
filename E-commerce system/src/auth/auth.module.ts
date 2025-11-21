@@ -9,8 +9,9 @@ import googleOAuthConfig from './config/google.oauth.config';
 import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { PassportModule } from '@nestjs/passport';
+
+import { Vendor } from 'src/vendors/entities/vendor.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Vendor } from 'src/users/entities/vendor.entity';
 @Module({
   imports: [
     PassportModule,

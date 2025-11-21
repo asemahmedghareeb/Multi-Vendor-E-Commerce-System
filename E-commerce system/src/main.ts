@@ -27,7 +27,11 @@ async function bootstrap() {
       },
     }),
   );
+<<<<<<< HEAD
+  
+=======
 
+>>>>>>> main
 
   app.useGlobalPipes(
     new I18nValidationPipe({

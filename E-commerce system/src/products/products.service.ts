@@ -6,13 +6,21 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Brackets, Repository } from 'typeorm';
+<<<<<<< HEAD
+import { Vendor } from '../vendors/entities/vendor.entity';
+=======
 import { Vendor } from '../users/entities/vendor.entity';
+>>>>>>> main
 import { Product } from './entities/product.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { Category } from '../categories/entities/category.entity';
 import { IPaginatedType } from 'src/common/dto/paginated-output';
 import { UpdateProductInput } from './dto/update-product.input';
+<<<<<<< HEAD
+import { Role } from 'src/auth/enums/role.enum';
+=======
 import { Role } from 'src/auth/role.enum';
+>>>>>>> main
 import { GetProductsFilterInput } from './dto/products-filter.input';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 @Injectable()
@@ -56,6 +64,68 @@ export class ProductsService {
     return product;
   }
 
+<<<<<<< HEAD
+  // async findAll(
+  //   input: GetProductsFilterInput,
+  // ): Promise<IPaginatedType<Product>> {
+  //   const {
+  //     page,
+  //     limit,
+  //     search,
+  //     categoryId,
+  //     categoryName,
+  //     minPrice,
+  //     maxPrice,
+  //   } = input;
+  //   const skip = (page - 1) * limit;
+
+  //   const qb = this.productRepo.createQueryBuilder('product');
+
+  //   qb.leftJoinAndSelect('product.vendor', 'vendor');
+  //   qb.leftJoinAndSelect('product.category', 'category');
+
+  //   if (search) {
+  //     qb.andWhere(
+  //       new Brackets((sub) => {
+  //         sub
+  //           .where('product.name ILIKE :search', { search: `%${search}%` })
+  //           .orWhere('product.description ILIKE :search', {
+  //             search: `%${search}%`,
+  //           });
+  //       }),
+  //     );
+  //   }
+
+  //   if (categoryId) {
+  //     qb.andWhere('product.categoryId = :categoryId', { categoryId });
+  //   }
+
+  //   if (categoryName) {
+  //     qb.andWhere('category.name ILIKE :categoryName', {
+  //       categoryName: `%${categoryName}%`,
+  //     });
+  //   }
+
+  //   if (minPrice !== undefined) {
+  //     qb.andWhere('product.price >= :minPrice', { minPrice: minPrice * 100 });
+  //   }
+  //   if (maxPrice !== undefined) {
+  //     qb.andWhere('product.price <= :maxPrice', { maxPrice: maxPrice * 100 });
+  //   }
+
+  //   qb.orderBy('product.createdAt', 'DESC');
+  //   qb.skip(skip).take(limit);
+
+  //   const [items, totalItems] = await qb.getManyAndCount();
+
+  //   return {
+  //     items,
+  //     totalItems,
+  //     totalPages: Math.ceil(totalItems / limit),
+  //   };
+  // }
+=======
+>>>>>>> main
   async findAll(
     input: GetProductsFilterInput,
   ): Promise<IPaginatedType<Product>> {
@@ -64,7 +134,11 @@ export class ProductsService {
       limit,
       search,
       categoryId,
+<<<<<<< HEAD
+      categoryName, // <--- This requires special handling
+=======
       categoryName,
+>>>>>>> main
       minPrice,
       maxPrice,
     } = input;
@@ -72,8 +146,18 @@ export class ProductsService {
 
     const qb = this.productRepo.createQueryBuilder('product');
 
+<<<<<<< HEAD
+    if (categoryName) {
+      qb.leftJoin('product.category', 'category');
+      qb.andWhere('category.name ILIKE :categoryName', {
+        categoryName: `%${categoryName}%`,
+      });
+    }
+
+=======
     qb.leftJoinAndSelect('product.vendor', 'vendor');
     qb.leftJoinAndSelect('product.category', 'category');
+>>>>>>> main
 
     if (search) {
       qb.andWhere(
@@ -91,12 +175,15 @@ export class ProductsService {
       qb.andWhere('product.categoryId = :categoryId', { categoryId });
     }
 
+<<<<<<< HEAD
+=======
     if (categoryName) {
       qb.andWhere('category.name ILIKE :categoryName', {
         categoryName: `%${categoryName}%`,
       });
     }
 
+>>>>>>> main
     if (minPrice !== undefined) {
       qb.andWhere('product.price >= :minPrice', { minPrice: minPrice * 100 });
     }
@@ -114,16 +201,29 @@ export class ProductsService {
       totalItems,
       totalPages: Math.ceil(totalItems / limit),
     };
+<<<<<<< HEAD
+  }
+
+
+=======
   } 
+>>>>>>> main
 
   async findOne(id: string): Promise<Product | null> {
     const product: Product | null = await this.productRepo.findOne({
       where: { id },
+<<<<<<< HEAD
+    });
+
+    if (!product) {
+      const message = this.i18n.t('events.product.NOT_FOUND');
+=======
       relations: ['vendor', 'category'],
     });
 
     if (!product) {
       const message = this.i18n.t('events.PRODUCT_NOT_FOUND');
+>>>>>>> main
       throw new NotFoundException(message);
     }
     return product;
@@ -135,7 +235,12 @@ export class ProductsService {
     input: UpdateProductInput,
   ): Promise<Product> {
     const product: Product | null = await this.findOne(input.id);
+<<<<<<< HEAD
+    if (!product)
+      throw new NotFoundException(this.i18n.t('events.product.NOT_FOUND'));
+=======
     if (!product) throw new NotFoundException(this.i18n.t('events.product.NOT_FOUND'));
+>>>>>>> main
 
     await this.checkOwnership(product, userId, userRole);
 
@@ -164,7 +269,12 @@ export class ProductsService {
   async remove(userId: string, userRole: string, id: string): Promise<boolean> {
     const product: Product | null = await this.findOne(id);
 
+<<<<<<< HEAD
+    if (!product)
+      throw new NotFoundException(this.i18n.t('events.product.NOT_FOUND'));
+=======
     if (!product) throw new NotFoundException(this.i18n.t('events.product.NOT_FOUND'));
+>>>>>>> main
     await this.checkOwnership(product, userId, userRole);
 
     await this.productRepo.remove(product);
