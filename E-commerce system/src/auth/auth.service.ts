@@ -229,17 +229,6 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  // async findOne(id: string): Promise<User> {
-  //   const user: User | null = await this.usersRepository.findOne({
-  //     where: { id },
-  //     relations: ['pushDevices'],
-  //   });
-  //   if (!user) {
-  //     throw new NotFoundException(`User with ID "${id}" not found.`);
-  //   }
-  //   return user;
-  // }
-
   async findByIds(userIds: string[]): Promise<User[]> {
     return this.userRepo.find({
       where: { id: In(userIds) },
