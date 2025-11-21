@@ -12,7 +12,11 @@ import { BullModule } from '@nestjs/bull';
 import { DataLoadersModule } from './dataLoaders/dataLoaders.module';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { CommonModule } from './common/common.module';
-import { addTransactionalDataSource } from 'typeorm-transactional';
+import {
+  addTransactionalDataSource,
+  deleteDataSourceByName,
+  getDataSourceByName,
+} from 'typeorm-transactional';
 import { DataSource } from 'typeorm';
 import { PubSubModule } from './pubsub/pubsub.module';
 import { FcmModule } from './fcm/fcm.module';
@@ -36,8 +40,12 @@ import { User } from './users/entities/user.entity';
 import { CartModule } from './cart/cart.module';
 import { Cart } from './cart/entities/cart.entity';
 import { CartItem } from './cart/entities/cart-item.entity';
+import { Order } from './orders/entities/order.entity';
+import { OrderItem } from './orders/entities/order-item.entity';
+import { OrderTracking } from './orders/entities/order-tracking.entity';
 import { APP_FILTER } from '@nestjs/core';
 import { I18nExceptionFilter } from './common/filters/i18n-exception.filter';
+import { Payment } from './payments/entities/payment.entity';
 @Module({
   imports: [
     I18nModule.forRoot({
@@ -87,6 +95,10 @@ import { I18nExceptionFilter } from './common/filters/i18n-exception.filter';
             Category,
             Cart,
             CartItem,
+            Order,
+            OrderItem,
+            OrderTracking,
+            Payment,
             // PushDevice,
           ],
         };
@@ -94,6 +106,10 @@ import { I18nExceptionFilter } from './common/filters/i18n-exception.filter';
       async dataSourceFactory(options) {
         if (!options) {
           throw new Error('Invalid options passed');
+        }
+
+        if (getDataSourceByName('default')) {
+          deleteDataSourceByName('default');
         }
 
         return addTransactionalDataSource(new DataSource(options));
@@ -110,49 +126,118 @@ import { I18nExceptionFilter } from './common/filters/i18n-exception.filter';
         'graphql-ws': true,
       },
 
+      // formatError: (formattedError, error: any) => {
+      //   const graphQLError = error;
+      //   const originalError = graphQLError.originalError;
+
+      //   if (originalError && (originalError as any).errors) {
+      //     const validationErrors = (originalError as any).errors;
+
+      //     const messages = validationErrors.map((err: any) =>
+      //       typeof err === 'string'
+      //         ? err
+      //         : Object.values(err.constraints || {})[0],
+      //     );
+
+      //     return {
+      //       message: messages[0] || 'Validation Error',
+      //       allMessages: messages,
+      //       statusCode: 400,
+      //       error: 'Bad Request',
+      //       path: formattedError.path,
+      //     };
+      //   }
+
+      //   if (originalError && (originalError as any).response) {
+      //     const response = (originalError as any).response;
+      //     const statusCode = response.statusCode || 400;
+
+      //     const msg = Array.isArray(response.message)
+      //       ? response.message[0]
+      //       : response.message;
+
+      //     return {
+      //       message: msg,
+      //       allMessages: response.message,
+      //       statusCode: statusCode,
+      //       error: response.error || 'Bad Request',
+      //       path: formattedError.path,
+      //     };
+      //   }
+
+      //   return {
+      //     message: formattedError.message,
+      //     code: formattedError.extensions?.code,
+      //     path: formattedError.path,
+      //   };
+      // },
       formatError: (formattedError, error: any) => {
-        const graphQLError = error;
-        const originalError = graphQLError.originalError;
+        const originalError = error.originalError;
 
-        if (originalError && (originalError as any).errors) {
-          const validationErrors = (originalError as any).errors;
+        // 1. Fast exit for non-NestJS errors (Syntax, Type Errors, etc.)
+        if (!originalError) {
+          return {
+            message: formattedError.message,
+            code: formattedError.extensions?.code,
+            path: formattedError.path,
+            timestamp: new Date().toISOString(),
+          };
+        }
 
-          const messages = validationErrors.map((err: any) =>
+        // 2. Variables to hold extracted data
+        let message = originalError.message || formattedError.message;
+        let statusCode = 500;
+        let errorType = 'Internal Server Error';
+        let allMessages = undefined;
+
+        // 3. Handle NestJS Exceptions (Standard & I18nFilter)
+        if (originalError.response) {
+          const response = originalError.response;
+          statusCode = originalError.status || 400;
+          errorType = response.error || 'Error';
+
+          // If response is a string (from our I18nExceptionFilter)
+          if (typeof response === 'string') {
+            message = response;
+          }
+          // If response is an object (Standard Validation)
+          else if (typeof response === 'object') {
+            // If it's an array of messages
+            if (Array.isArray(response.message)) {
+              message = response.message[0];
+              allMessages = response.message;
+            }
+            // Fallback for object style
+            else if (response.message) {
+              message = response.message;
+            }
+          }
+        }
+        // 4. Handle Raw Class-Validator / I18n Pipe Errors (if filter is bypassed)
+        else if (originalError.errors) {
+          statusCode = 400;
+          errorType = 'Bad Request';
+          const rawErrors = originalError.errors;
+
+          // Map to clean strings
+          const cleanMessages = rawErrors.map((err: any) =>
             typeof err === 'string'
               ? err
               : Object.values(err.constraints || {})[0],
           );
 
-          return {
-            message: messages[0] || 'Validation Error',
-            allMessages: messages,
-            statusCode: 400,
-            error: 'Bad Request',
-            path: formattedError.path,
-          };
+          message = cleanMessages[0];
+          allMessages = cleanMessages;
         }
 
-        if (originalError && (originalError as any).response) {
-          const response = (originalError as any).response;
-          const statusCode = response.statusCode || 400;
-
-          const msg = Array.isArray(response.message)
-            ? response.message[0]
-            : response.message;
-
-          return {
-            message: msg,
-            allMessages: response.message,
-            statusCode: statusCode,
-            error: response.error || 'Bad Request',
-            path: formattedError.path,
-          };
-        }
-
+        // 5. Return Unified Error Structure
         return {
-          message: formattedError.message,
-          code: formattedError.extensions?.code,
+          message,
+          allMessages,
+          statusCode,
+          error: errorType,
           path: formattedError.path,
+          timestamp: new Date().toISOString(),
         };
       },
     }),

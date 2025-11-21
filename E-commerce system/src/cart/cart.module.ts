@@ -17,5 +17,6 @@ import { User } from 'src/users/entities/user.entity';
   ],
 
   providers: [CartResolver, CartService, CartItemResolver],
+  exports: [CartService],
 })
 export class CartModule {}
