@@ -71,16 +71,69 @@ type PaginatedProductOutput {
   totalPages: Int!
 }
 
-type PaginatedCategoryOutput {
-  items: [Category!]!
-  totalItems: Int!
-  totalPages: Int!
+type OrderTracking {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  status: OrderStatus!
+  remarks: String
 }
 
-type PaginatedUserOutput {
-  items: [User!]!
-  totalItems: Int!
-  totalPages: Int!
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+type OrderItem {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  quantity: Int!
+  priceAtPurchase: Float!
+  status: OrderStatus!
+  product: Product!
+  vendor: Vendor!
+  trackingHistory: [OrderTracking!]
+}
+
+type Order {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User!
+  totalAmount: Float!
+  shippingAddress: String!
+  items: [OrderItem!]!
+  payment: Payment
+}
+
+type Payment {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  order: Order!
+  stripePaymentId: String!
+  stripeClientSecret: String
+  amount: Float!
+  amountCaptured: Float!
+  amountRefunded: Float!
+  currency: String!
+  provider: String!
+  status: PaymentStatus!
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
 }
 
 type CartItem {
@@ -100,15 +153,28 @@ type Cart {
   items: [CartItem!]!
 }
 
+type PaginatedCategoryOutput {
+  items: [Category!]!
+  totalItems: Int!
+  totalPages: Int!
+}
+
+type PaginatedUserOutput {
+  items: [User!]!
+  totalItems: Int!
+  totalPages: Int!
+}
+
 type Query {
   products(filter: GetProductsFilterInput): PaginatedProductOutput!
   product(id: String!): Product!
+  myOrders: [Order!]!
+  myCart: Cart!
   categories(pagination: PaginationInput): PaginatedCategoryOutput!
   category(id: String!): Category!
   users(pagination: PaginationInput): PaginatedUserOutput!
   user(id: String!): User!
   me: User!
-  myCart: Cart!
 }
 
 input GetProductsFilterInput {
@@ -136,15 +202,16 @@ type Mutation {
   createProduct(createProductInput: CreateProductInput!): Product!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   removeProduct(id: String!): Boolean!
+  createOrder(input: CreateOrderInput!): Order!
+  addToCart(input: AddToCartInput!): Cart!
+  updateCartItem(input: UpdateCartItemInput!): Cart!
+  removeFromCart(cartItemId: String!): Cart!
   approveVendor(userId: String!): Vendor!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   removeCategory(id: String!): Boolean!
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: String!): Boolean!
-  addToCart(input: AddToCartInput!): Cart!
-  updateCartItem(input: UpdateCartItemInput!): Cart!
-  removeFromCart(cartItemId: String!): Cart!
 }
 
 input RegisterInput {
@@ -194,6 +261,20 @@ input UpdateProductInput {
   id: String!
 }
 
+input CreateOrderInput {
+  shippingAddress: String!
+}
+
+input AddToCartInput {
+  productId: String!
+  quantity: Int!
+}
+
+input UpdateCartItemInput {
+  cartItemId: String!
+  quantity: Int!
+}
+
 input CreateCategoryInput {
   name: String!
   parentId: String
@@ -208,14 +289,4 @@ input UpdateCategoryInput {
 input UpdateUserInput {
   email: String
   password: String
-}
-
-input AddToCartInput {
-  productId: String!
-  quantity: Int!
-}
-
-input UpdateCartItemInput {
-  cartItemId: String!
-  quantity: Int!
 }
