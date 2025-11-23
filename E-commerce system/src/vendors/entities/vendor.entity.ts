@@ -36,7 +36,6 @@ export class Vendor extends BaseEntity {
   user: User;
 
 
-  // @Field() 
   @RelationId((vendor: Vendor) => vendor.user)
   userId: string;
 }

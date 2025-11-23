@@ -11,6 +11,9 @@ import { Product } from 'src/products/entities/product.entity';
 import { CartItem } from 'src/cart/entities/cart-item.entity';
 import { OrderTracking } from './entities/order-tracking.entity';
 import { PaymentsService } from 'src/payments/payments.service';
+import { Cart } from 'src/cart/entities/cart.entity';
+import { Vendor } from 'src/vendors/entities/vendor.entity';
+import { PaymentsModule } from 'src/payments/payments.module';
 
 @Module({
   imports: [
@@ -18,14 +21,17 @@ import { PaymentsService } from 'src/payments/payments.service';
       Order,
       OrderItem,
       OrderTracking,
-      Product, 
+      Product,
+      Cart,
       CartItem,
       User,
+      Vendor,
       Payment,
     ]),
     CartModule,
+    PaymentsModule
   ],
-  providers: [OrdersResolver, OrdersService, PaymentsService],
+  providers: [OrdersResolver, OrdersService],
   exports: [OrdersService],
 })
 export class OrdersModule {}

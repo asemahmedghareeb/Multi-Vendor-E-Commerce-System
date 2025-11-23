@@ -13,7 +13,7 @@ import express from 'express';
 @Controller('payments')
 export class PaymentsController {
   private stripe: Stripe;
-
+ 
   constructor(
     private readonly paymentsService: PaymentsService,
     private readonly configService: ConfigService,
@@ -33,13 +33,15 @@ export class PaymentsController {
     @Req() req: express.Request,
     @Headers('stripe-signature') signature: string,
   ) {
+    console.log('Webhook Endpoint Hit!');
+
     if (!signature) throw new BadRequestException('Missing Stripe Signature');
 
     let event: Stripe.Event;
 
     try {
       event = this.stripe.webhooks.constructEvent(
-        req['rawBody'],
+        req.body,
         signature,
         this.configService.get('STRIPE_WEBHOOK_SECRET') as string,
       );
@@ -48,13 +50,13 @@ export class PaymentsController {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the specific event
     if (event.type === 'payment_intent.succeeded') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       console.log('Payment Succeeded:', paymentIntent.id);
 
       await this.paymentsService.handlePaymentSuccess(paymentIntent);
     }
+    
 
     return { received: true };
   }

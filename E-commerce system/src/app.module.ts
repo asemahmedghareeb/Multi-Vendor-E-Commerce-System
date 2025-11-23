@@ -46,6 +46,13 @@ import { OrderTracking } from './orders/entities/order-tracking.entity';
 import { APP_FILTER } from '@nestjs/core';
 import { I18nExceptionFilter } from './common/filters/i18n-exception.filter';
 import { Payment } from './payments/entities/payment.entity';
+import { WalletModule } from './wallet/wallet.module';
+import { Wallet } from './wallet/entities/wallet.entity';
+import { WalletTransaction } from './wallet/entities/wallet-transaction.entity';
+import { FollowModule } from './follow/follow.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { Follow } from './follow/entities/follow.entity';
+import { Review } from './reviews/entities/review.entity';
 @Module({
   imports: [
     I18nModule.forRoot({
@@ -99,6 +106,10 @@ import { Payment } from './payments/entities/payment.entity';
             OrderItem,
             OrderTracking,
             Payment,
+            Wallet,
+            WalletTransaction,
+            Follow,
+            Review,
             // PushDevice,
           ],
         };
@@ -267,6 +278,9 @@ import { Payment } from './payments/entities/payment.entity';
     CategoriesModule,
     UsersModule,
     CartModule,
+    WalletModule,
+    FollowModule,
+    ReviewsModule,
   ],
 })
 export class AppModule {}

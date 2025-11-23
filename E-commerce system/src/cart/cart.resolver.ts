@@ -55,16 +55,7 @@ export class CartResolver {
   }
 }
 
-// @Resolver(() => CartItem)
-// export class CartItemResolver {
-//   constructor(private readonly productLoader: ProductLoader) {}
 
-//   @ResolveField(() => Product)
-//   async product(@Parent() cartItem: CartItem) {
-//     console.log(cartItem.product)
-//     return this.productLoader.batchProducts.load(cartItem.productId);
-//   }
-// }
 
 @Resolver(() => CartItem)
 export class CartItemResolver {
@@ -72,6 +63,7 @@ export class CartItemResolver {
 
   @ResolveField(() => Product)
   async product(@Parent() cartItem: CartItem) {
+    console.log(cartItem);
     if (cartItem.product) return cartItem.product;
     if (!cartItem.productId) return null;
     return this.productLoader.batchProducts.load(cartItem.productId);

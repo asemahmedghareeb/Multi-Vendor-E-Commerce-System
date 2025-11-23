@@ -1,3 +1,4 @@
+import { OrderStatus } from './../orders/enum/order-status.enum';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -5,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { Payment, PaymentStatus } from './entities/payment.entity';
 import { Order } from '../orders/entities/order.entity';
+import { WalletsService } from 'src/wallet/wallet.service';
 
 @Injectable()
 export class PaymentsService {
@@ -12,7 +14,9 @@ export class PaymentsService {
 
   constructor(
     @InjectRepository(Payment) private paymentRepo: Repository<Payment>,
+    @InjectRepository(Order) private orderRepo: Repository<Order>,
     private configService: ConfigService,
+    private readonly walletsService: WalletsService,
   ) {
     const apiKey = this.configService.get<string>('STRIPE_SECRET_KEY');
 
@@ -49,13 +53,11 @@ export class PaymentsService {
 
       return this.paymentRepo.save(payment);
     } catch (error) {
-      console.error('Stripe Error:', error);
       throw new InternalServerErrorException('Failed to create payment intent');
     }
   }
 
   async handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
-    // 1. Find the Payment record
     const payment = await this.paymentRepo.findOne({
       where: { stripePaymentId: paymentIntent.id },
       relations: ['order'],
@@ -63,16 +65,24 @@ export class PaymentsService {
 
     if (!payment) return;
 
-    // 2. Update Status
     payment.status = PaymentStatus.SUCCEEDED;
     payment.amountCaptured = paymentIntent.amount_received;
     payment.metadata = paymentIntent;
     await this.paymentRepo.save(payment);
 
-    // 3. Update Order Status
-    // You might need to inject OrdersService or Repository here
-    // Or emit an event using EventEmitter
+    const order = payment.order;
+    if (order) {
+      order.status = OrderStatus.PROCESSING;
+      await this.orderRepo.save(order);
+    }
 
-    // TODO: Call WalletService to distribute funds (90% Vendor, 10% Admin)
+    const fullOrder = await this.orderRepo.findOne({
+      where: { id: order.id },
+      relations: ['items'],
+    });
+
+    if (fullOrder) {
+      await this.walletsService.processOrderRevenue(fullOrder);
+    }
   }
 }

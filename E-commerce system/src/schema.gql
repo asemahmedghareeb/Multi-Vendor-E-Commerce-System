@@ -2,6 +2,125 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Category {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  parent: Category
+  children: [Category!]
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Product {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  description: String!
+  price: Float!
+  inventoryCount: Int!
+  images: [String!]
+  vendor: Vendor!
+  category: Category!
+}
+
+type OrderTracking {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  status: OrderStatus!
+  remarks: String
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+type OrderItem {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  quantity: Int!
+  priceAtPurchase: Float!
+  status: OrderStatus!
+  order: Order!
+  product: Product!
+  vendor: Vendor!
+  trackingHistory: [OrderTracking!]
+}
+
+type Payment {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  order: Order!
+  stripePaymentId: String!
+  stripeClientSecret: String
+  amount: Float!
+  amountCaptured: Float!
+  amountRefunded: Float!
+  currency: String!
+  provider: String!
+  status: PaymentStatus!
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+type Order {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User!
+  totalAmount: Float!
+  shippingAddress: String!
+  status: OrderStatus!
+  items: [OrderItem!]!
+  payment: Payment
+}
+
+type WalletTransaction {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  amount: Float!
+  type: TransactionType!
+  description: String!
+}
+
+enum TransactionType {
+  DEPOSIT
+  SALE
+  COMMISSION
+  PAYOUT
+  REFUND
+}
+
+type Wallet {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  balance: Float!
+  transactions: [WalletTransaction!]!
+}
+
 type User {
   id: ID!
   createdAt: DateTime!
@@ -10,11 +129,6 @@ type User {
   role: UserRole!
   vendorProfile: Vendor
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 enum UserRole {
   SUPER_ADMIN
@@ -43,97 +157,18 @@ type RegisterResponse {
   msg: String!
 }
 
-type Product {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  name: String!
-  description: String!
-  price: Float!
-  inventoryCount: Int!
-  images: [String!]
-  vendor: Vendor!
-  category: Category!
-}
-
-type Category {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  name: String!
-  parent: Category
-  children: [Category!]
-}
-
 type PaginatedProductOutput {
   items: [Product!]!
   totalItems: Int!
   totalPages: Int!
 }
 
-type OrderTracking {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  status: OrderStatus!
-  remarks: String
-}
-
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  RETURNED
-}
-
-type OrderItem {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  quantity: Int!
-  priceAtPurchase: Float!
-  status: OrderStatus!
-  product: Product!
-  vendor: Vendor!
-  trackingHistory: [OrderTracking!]
-}
-
-type Order {
+type Cart {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   user: User!
-  totalAmount: Float!
-  shippingAddress: String!
-  items: [OrderItem!]!
-  payment: Payment
-}
-
-type Payment {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  order: Order!
-  stripePaymentId: String!
-  stripeClientSecret: String
-  amount: Float!
-  amountCaptured: Float!
-  amountRefunded: Float!
-  currency: String!
-  provider: String!
-  status: PaymentStatus!
-}
-
-enum PaymentStatus {
-  PENDING
-  REQUIRES_ACTION
-  PROCESSING
-  SUCCEEDED
-  FAILED
-  REFUNDED
-  PARTIALLY_REFUNDED
+  items: [CartItem!]!
 }
 
 type CartItem {
@@ -143,14 +178,6 @@ type CartItem {
   quantity: Int!
   product: Product!
   productId: String!
-}
-
-type Cart {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  user: User!
-  items: [CartItem!]!
 }
 
 type PaginatedCategoryOutput {
@@ -165,16 +192,41 @@ type PaginatedUserOutput {
   totalPages: Int!
 }
 
+type Follow {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  follower: User!
+  followerId: String!
+  vendor: Vendor!
+  vendorId: String!
+}
+
+type Review {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  rating: Int!
+  comment: String!
+  user: User!
+  vendor: Vendor!
+  order: Order!
+}
+
 type Query {
   products(filter: GetProductsFilterInput): PaginatedProductOutput!
   product(id: String!): Product!
+  myWallet: Wallet
   myOrders: [Order!]!
+  vendorOrders: [OrderItem!]!
   myCart: Cart!
   categories(pagination: PaginationInput): PaginatedCategoryOutput!
   category(id: String!): Category!
   users(pagination: PaginationInput): PaginatedUserOutput!
   user(id: String!): User!
   me: User!
+  myFollows: [Follow!]!
+  vendorReviews(vendorId: String!): [Review!]!
 }
 
 input GetProductsFilterInput {
@@ -203,6 +255,7 @@ type Mutation {
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   removeProduct(id: String!): Boolean!
   createOrder(input: CreateOrderInput!): Order!
+  updateItemStatus(itemId: String!, status: OrderStatus!): OrderItem!
   addToCart(input: AddToCartInput!): Cart!
   updateCartItem(input: UpdateCartItemInput!): Cart!
   removeFromCart(cartItemId: String!): Cart!
@@ -212,6 +265,11 @@ type Mutation {
   removeCategory(id: String!): Boolean!
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: String!): Boolean!
+  followVendor(vendorId: String!): Boolean!
+  unfollowVendor(vendorId: String!): Boolean!
+  createReview(input: CreateReviewInput!): Review!
+  updateReview(input: UpdateReviewInput!): Review!
+  removeReview(id: String!): Boolean!
 }
 
 input RegisterInput {
@@ -289,4 +347,19 @@ input UpdateCategoryInput {
 input UpdateUserInput {
   email: String
   password: String
+}
+
+input CreateReviewInput {
+  vendorId: String!
+  orderId: String!
+  rating: Int!
+  comment: String!
+}
+
+input UpdateReviewInput {
+  vendorId: String
+  orderId: String
+  rating: Int
+  comment: String
+  id: String!
 }

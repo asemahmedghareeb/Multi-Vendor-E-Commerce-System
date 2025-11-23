@@ -27,13 +27,11 @@ export class CartService {
   async getCart(userId: string): Promise<Cart> {
     let cart = await this.cartRepo.findOne({
       where: { user: { id: userId } },
-      relations: ['items', 'user'],
+      relations: ['items', 'user', 'items.product', 'items.product.vendor'],
       order: { items: { createdAt: 'ASC' } },
     });
 
     if (!cart) {
-      console.log('no cart for this user');
-
       const user = await this.userRepo.findOne({ where: { id: userId } });
 
       if (!user) {
@@ -43,6 +41,7 @@ export class CartService {
       cart = this.cartRepo.create({ user: user, items: [] });
       await this.cartRepo.save(cart);
     }
+
     return cart;
   }
 
@@ -101,7 +100,6 @@ export class CartService {
         product,
         quantity: input.quantity,
       });
-
       await this.cartItemRepo.save(cartItem);
       cart.items.push(cartItem);
       //   this.cartRepo.save(cart);
@@ -121,7 +119,6 @@ export class CartService {
     });
 
     if (!cartItem) {
-      console.log('here');
       throw new NotFoundException(this.i18n.t('events.cart.ITEM_NOT_FOUND'));
     }
 
