@@ -27,13 +27,11 @@ export class CartService {
   async getCart(userId: string): Promise<Cart> {
     let cart = await this.cartRepo.findOne({
       where: { user: { id: userId } },
-      relations: ['items', 'user'],
+      relations: ['items', 'user', 'items.product', 'items.product.vendor'],
       order: { items: { createdAt: 'ASC' } },
     });
 
     if (!cart) {
-      console.log('no cart for this user');
-
       const user = await this.userRepo.findOne({ where: { id: userId } });
 
       if (!user) {
@@ -43,14 +41,17 @@ export class CartService {
       cart = this.cartRepo.create({ user: user, items: [] });
       await this.cartRepo.save(cart);
     }
+
     return cart;
   }
 
   async addToCart(userId: string, input: AddToCartInput): Promise<Cart> {
+
     let cart = await this.cartRepo.findOne({
       where: { user: { id: userId } },
       relations: ['items', 'items.product'],
     });
+
 
     if (!cart) {
       const user = await this.userRepo.findOne({ where: { id: userId } });
@@ -60,10 +61,11 @@ export class CartService {
       cart = this.cartRepo.create({
         user: user,
         items: [],
+        totalAmount: 0, 
       });
-
       await this.cartRepo.save(cart);
     }
+
 
     const product = await this.productRepo.findOne({
       where: { id: input.productId },
@@ -72,6 +74,8 @@ export class CartService {
     if (!product) {
       throw new NotFoundException('events.product.NOT_FOUND');
     }
+
+
     let cartItem = cart.items.find(
       (item) => item.product.id === input.productId,
     );
@@ -89,6 +93,7 @@ export class CartService {
       cartItem.quantity = newQuantity;
       await this.cartItemRepo.save(cartItem);
     } else {
+      
       if (product.inventoryCount < input.quantity) {
         throw new BadRequestException({
           key: 'events.product.INSUFFICIENT_INVENTORY',
@@ -103,11 +108,20 @@ export class CartService {
       });
 
       await this.cartItemRepo.save(cartItem);
+
       cart.items.push(cartItem);
-      //   this.cartRepo.save(cart);
     }
+
+    
+    cart.totalAmount = cart.items.reduce((sum, item) => {
+      return sum + item.quantity * item.product.price;
+    }, 0);
+
+    await this.cartRepo.save(cart);
+
     return cart;
   }
+
 
   async updateCartItem(
     userId: string,
@@ -121,7 +135,6 @@ export class CartService {
     });
 
     if (!cartItem) {
-      console.log('here');
       throw new NotFoundException(this.i18n.t('events.cart.ITEM_NOT_FOUND'));
     }
 

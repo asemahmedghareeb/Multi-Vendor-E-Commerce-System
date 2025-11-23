@@ -2,8 +2,8 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
-import { CartService } from '../cart/cart.service';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { CreateOrderInput } from './dto/create-order.input';
@@ -15,10 +15,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Transactional } from 'typeorm-transactional';
 import { OrderStatus } from './enum/order-status.enum';
 import { PaymentsService } from 'src/payments/payments.service';
+import { OrderTracking } from './entities/order-tracking.entity';
+import { Cart } from 'src/cart/entities/cart.entity';
+import { Vendor } from 'src/vendors/entities/vendor.entity';
 @Injectable()
 export class OrdersService {
   constructor(
-    @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
+    @InjectRepository(Order)
+    private readonly orderRepo: Repository<Order>,
+    @InjectRepository(OrderTracking)
+    private readonly orderTrackingRepo: Repository<OrderTracking>,
     @InjectRepository(OrderItem)
     private readonly orderItemRepo: Repository<OrderItem>,
     @InjectRepository(Product)
@@ -27,7 +33,12 @@ export class OrdersService {
     private readonly cartItemRepo: Repository<CartItem>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    private readonly cartService: CartService,
+    @InjectRepository(Vendor)
+    private readonly vendorRepo: Repository<Vendor>,
+    @InjectRepository(OrderTracking)
+    private readonly trackingRepo: Repository<OrderTracking>,
+    @InjectRepository(Cart)
+    private readonly cartRepo: Repository<Cart>,
     private readonly paymentsService: PaymentsService,
   ) {}
 
@@ -36,14 +47,22 @@ export class OrdersService {
     user: { role: string; userId: string },
     input: CreateOrderInput,
   ): Promise<Order> {
-    const cart = await this.cartService.getCart(user.userId);
+    const cart = await this.cartRepo.findOne({
+      where: { user: { id: user.userId } },
+      relations: ['items', 'user', 'items.product', 'items.product.vendor'],
+      order: { items: { createdAt: 'ASC' } },
+    });
+
+    if (!cart) {
+      throw new NotFoundException('events.cart.NOT_FOUND');
+    }
 
     if (!cart.items || cart.items.length === 0) {
       throw new BadRequestException('events.cart.EMPTY');
     }
 
     let totalAmount = 0;
-    const orderItems: OrderItem[] = [];
+    const orderItemsToCreate: OrderItem[] = [];
 
     for (const item of cart.items) {
       if (item.product.inventoryCount < item.quantity) {
@@ -52,6 +71,8 @@ export class OrdersService {
           args: { count: item.product.inventoryCount },
         });
       }
+
+
 
       totalAmount += item.product.price * item.quantity;
 
@@ -63,7 +84,7 @@ export class OrdersService {
         status: OrderStatus.PENDING,
       });
 
-      orderItems.push(orderItem);
+      orderItemsToCreate.push(orderItem);
 
       await this.productRepo.decrement(
         { id: item.product.id },
@@ -78,17 +99,99 @@ export class OrdersService {
       user: usr!,
       totalAmount,
       shippingAddress: input.shippingAddress,
+      status: OrderStatus.PENDING,
     });
 
     const savedOrder = await this.orderRepo.save(order);
 
-    orderItems.forEach((item) => (item.order = savedOrder));
-    await this.orderItemRepo.save(orderItems);
+    orderItemsToCreate.forEach((item) => (item.order = savedOrder));
+    const savedOrderItems = await this.orderItemRepo.save(orderItemsToCreate);
+
+    const trackingRecords = savedOrderItems.map((savedItem) => {
+      return this.orderTrackingRepo.create({
+        orderItem: savedItem,
+        remarks: 'Order created',
+        status: OrderStatus.PENDING,
+      });
+    });
+
+    await this.orderTrackingRepo.save(trackingRecords);
+
     await this.cartItemRepo.delete({ cart: { id: cart.id } });
 
-    //add the payment here
-    const payment = await this.paymentsService.createPaymentIntent(savedOrder);
-    
+    await this.paymentsService.createPaymentIntent(savedOrder);
+
     return savedOrder;
+  }
+
+
+  async getMyOrders(userId: string): Promise<Order[]> {
+    return this.orderRepo.find({
+      where: { user: { id: userId } },
+      relations: ['items', 'items.product', 'payment'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getVendorOrders(userId: string): Promise<OrderItem[]> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+
+    if (!user) throw new NotFoundException('events.user.NOT_FOUND');
+
+    const vendor = await this.vendorRepo.findOne({ where: { user: { id: userId } } });
+    if (!vendor) throw new NotFoundException('events.vendor.NOT_FOUND');
+
+    return this.orderItemRepo.find({
+      where: { vendor: { id: vendor.id } },
+      relations: ['product', 'order', 'order.user'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getOrder(
+    orderId: string,
+    userId: string,
+    role: string,
+  ): Promise<Order> {
+    const order = await this.orderRepo.findOne({
+      where: { id: orderId },
+      relations: ['items', 'items.product', 'payment', 'items.vendor'],
+    });
+
+    if (!order) throw new NotFoundException('events.order.NOT_FOUND');
+
+    if (role !== 'SUPER_ADMIN' && order.userId !== userId) {
+      throw new ForbiddenException('events.common.FORBIDDEN');
+    }
+
+    return order;
+  }
+
+  async updateOrderItemStatus(
+    user: { userId: string, role: string },
+    itemId: string,
+    newStatus: OrderStatus,
+  ): Promise<OrderItem> {
+    const item = await this.orderItemRepo.findOne({
+      where: { id: itemId },
+      relations: ['vendor', 'vendor.user'],
+    });
+
+    if (!item) throw new NotFoundException('events.order.ITEM_NOT_FOUND');
+
+    if (item.vendor.userId !== user.userId  || user.role !== 'SUPER_ADMIN') {
+      throw new ForbiddenException('events.vendor.NOT_OWNER');
+    }
+
+    item.status = newStatus;
+    const savedItem = await this.orderItemRepo.save(item);
+
+    await this.trackingRepo.save({
+      orderItem: savedItem,
+      status: newStatus,
+      remarks: 'Updated by vendor',
+    });
+
+    return savedItem;
   }
 }

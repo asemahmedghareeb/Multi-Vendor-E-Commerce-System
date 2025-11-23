@@ -41,6 +41,7 @@ export class OrderItem extends BaseEntity {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status: OrderStatus;
 
+  @Field(() => Order)
   @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })
   order: Order;
@@ -53,7 +54,6 @@ export class OrderItem extends BaseEntity {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @Column({ nullable: true })
   @RelationId((item: OrderItem) => item.product)
   productId: string;
 
@@ -64,6 +64,10 @@ export class OrderItem extends BaseEntity {
 
   @RelationId((item: OrderItem) => item.vendor)
   vendorId: string;
+
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  refundedQuantity: number;
 
   @Field(() => [OrderTracking], { nullable: true })
   @OneToMany(() => OrderTracking, (tracking) => tracking.orderItem)

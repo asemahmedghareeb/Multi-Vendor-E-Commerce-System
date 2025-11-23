@@ -1,0 +1,28 @@
+import { Resolver, Query, ResolveField, Parent } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+
+import { Wallet } from './entities/wallet.entity';
+import { WalletTransaction } from './entities/wallet-transaction.entity';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { User } from '../users/entities/user.entity';
+import { WalletsService } from './wallet.service';
+import { WalletTransactionsLoader } from 'src/dataLoaders/wallet-transactions.loader';
+@Resolver(() => Wallet)
+export class WalletsResolver {
+  constructor(
+    private readonly walletsService: WalletsService,
+    private readonly walletTransactionsLoader: WalletTransactionsLoader,
+  ) {}
+
+  @Query(() => Wallet, { name: 'myWallet', nullable: true })
+  @UseGuards(AuthGuard)
+  async myWallet(@CurrentUser() user: User) {
+    return this.walletsService.getMyWallet(user.id);
+  }
+
+  @ResolveField(() => [WalletTransaction])
+  async transactions(@Parent() wallet: Wallet) {
+    return this.walletTransactionsLoader.byWalletId.load(wallet.id);
+  }
+}

@@ -9,11 +9,21 @@ import { CategoryLoader } from './category.loader';
 import { ProductLoader } from './products.loader';
 import { Product } from 'src/products/entities/product.entity';
 import { User } from 'src/users/entities/user.entity';
+import { WalletTransactionsLoader } from './wallet-transactions.loader';
+import { Wallet } from 'src/wallet/entities/wallet.entity';
+import { WalletTransaction } from 'src/wallet/entities/wallet-transaction.entity';
 @Global()
 @Module({
   imports: [
     AuthModule,
-    TypeOrmModule.forFeature([Vendor, Category, User, Product]),
+    TypeOrmModule.forFeature([
+      Vendor,
+      Category,
+      User,
+      Product,
+      Wallet,
+      WalletTransaction,
+    ]),
   ],
   providers: [
     UserLoader,
@@ -21,6 +31,7 @@ import { User } from 'src/users/entities/user.entity';
     CategoryLoader,
     ProductLoader,
     VendorLoader,
+    WalletTransactionsLoader,
   ],
   exports: [
     UserLoader,
@@ -28,6 +39,7 @@ import { User } from 'src/users/entities/user.entity';
     CategoryLoader,
     ProductLoader,
     VendorLoader,
+    WalletTransactionsLoader,
   ],
 })
 export class DataLoadersModule {}

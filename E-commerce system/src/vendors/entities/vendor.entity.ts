@@ -1,7 +1,10 @@
-import { Entity, Column, OneToOne, JoinColumn, RelationId } from 'typeorm';
+import { Review } from './../../reviews/entities/review.entity';
+import { Entity, Column, OneToOne, JoinColumn, RelationId, OneToMany } from 'typeorm';
 import { ObjectType, Field, Float } from '@nestjs/graphql';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Product } from 'src/products/entities/product.entity';
+import { OrderItem } from 'src/orders/entities/order-item.entity';
 
 
 export enum VendorStatus {
@@ -32,11 +35,24 @@ export class Vendor extends BaseEntity {
 
   @Field(() => User)
   @OneToOne(() => User, (user) => user.vendorProfile)
-  @JoinColumn({ name: 'userId' }) // Best practice: Explicitly name the DB column
+  @JoinColumn({ name: 'userId' }) 
   user: User;
 
 
-  // @Field() 
   @RelationId((vendor: Vendor) => vendor.user)
   userId: string;
+
+  @Field(() => [Product])
+  @OneToMany(() => Product, (product) => product.vendor)
+  products: Product[];
+
+  @Field(() => [OrderItem])
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.vendor)
+  orders: OrderItem[];
+  
+  @Field(() => [Review])
+  @OneToMany(() => Review, (review) => review.vendor)
+  reviews: Review[];
+
+
 }

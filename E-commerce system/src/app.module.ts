@@ -46,6 +46,14 @@ import { OrderTracking } from './orders/entities/order-tracking.entity';
 import { APP_FILTER } from '@nestjs/core';
 import { I18nExceptionFilter } from './common/filters/i18n-exception.filter';
 import { Payment } from './payments/entities/payment.entity';
+import { WalletModule } from './wallet/wallet.module';
+import { Wallet } from './wallet/entities/wallet.entity';
+import { WalletTransaction } from './wallet/entities/wallet-transaction.entity';
+import { FollowModule } from './follow/follow.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { Follow } from './follow/entities/follow.entity';
+import { Review } from './reviews/entities/review.entity';
+import { Refund } from './payments/entities/refund.entity';
 @Module({
   imports: [
     I18nModule.forRoot({
@@ -99,6 +107,11 @@ import { Payment } from './payments/entities/payment.entity';
             OrderItem,
             OrderTracking,
             Payment,
+            Wallet,
+            WalletTransaction,
+            Follow,
+            Review,
+            Refund,
             // PushDevice,
           ],
         };
@@ -126,51 +139,6 @@ import { Payment } from './payments/entities/payment.entity';
         'graphql-ws': true,
       },
 
-      // formatError: (formattedError, error: any) => {
-      //   const graphQLError = error;
-      //   const originalError = graphQLError.originalError;
-
-      //   if (originalError && (originalError as any).errors) {
-      //     const validationErrors = (originalError as any).errors;
-
-      //     const messages = validationErrors.map((err: any) =>
-      //       typeof err === 'string'
-      //         ? err
-      //         : Object.values(err.constraints || {})[0],
-      //     );
-
-      //     return {
-      //       message: messages[0] || 'Validation Error',
-      //       allMessages: messages,
-      //       statusCode: 400,
-      //       error: 'Bad Request',
-      //       path: formattedError.path,
-      //     };
-      //   }
-
-      //   if (originalError && (originalError as any).response) {
-      //     const response = (originalError as any).response;
-      //     const statusCode = response.statusCode || 400;
-
-      //     const msg = Array.isArray(response.message)
-      //       ? response.message[0]
-      //       : response.message;
-
-      //     return {
-      //       message: msg,
-      //       allMessages: response.message,
-      //       statusCode: statusCode,
-      //       error: response.error || 'Bad Request',
-      //       path: formattedError.path,
-      //     };
-      //   }
-
-      //   return {
-      //     message: formattedError.message,
-      //     code: formattedError.extensions?.code,
-      //     path: formattedError.path,
-      //   };
-      // },
       formatError: (formattedError, error: any) => {
         const originalError = error.originalError;
 
@@ -251,9 +219,7 @@ import { Payment } from './payments/entities/payment.entity';
       }),
       inject: [ConfigService],
     }),
-    //core modules
     AuthModule,
-    //shared modules
     EmailsModule,
     DataLoadersModule,
     CommonModule,
@@ -267,6 +233,9 @@ import { Payment } from './payments/entities/payment.entity';
     CategoriesModule,
     UsersModule,
     CartModule,
+    WalletModule,
+    FollowModule,
+    ReviewsModule,
   ],
 })
 export class AppModule {}

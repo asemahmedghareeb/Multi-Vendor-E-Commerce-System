@@ -6,6 +6,8 @@ import { CreateOrderInput } from './dto/create-order.input';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { OrderItem } from './entities/order-item.entity';
+import { OrderStatus } from './enum/order-status.enum';
 @Resolver(() => Order)
 export class OrdersResolver {
   constructor(private readonly ordersService: OrdersService) {}
@@ -19,12 +21,25 @@ export class OrdersResolver {
     return this.ordersService.createOrder(user, input);
   }
 
-  // Optional: A simple query to see my orders
   @Query(() => [Order], { name: 'myOrders' })
   @UseGuards(AuthGuard)
   async myOrders(@CurrentUser() user: User) {
-    // You'll need to add a simple find method in service for this later
-    // return this.ordersService.findAllByUser(user.id);
-    return [];
+    return this.ordersService.getMyOrders(user.id);
+  }
+
+  @Query(() => [OrderItem], { name: 'vendorOrders' })
+  @UseGuards(AuthGuard)
+  async vendorOrders(@CurrentUser() user: { role: string; userId: string }) {
+    return this.ordersService.getVendorOrders(user.userId);
+  }
+
+  @Mutation(() => OrderItem)
+  @UseGuards(AuthGuard)
+  async updateItemStatus(
+    @Args('itemId') itemId: string,
+    @Args('status', { type: () => OrderStatus }) status: OrderStatus,
+    @CurrentUser() user: { role: string; userId: string },
+  ) {
+    return this.ordersService.updateOrderItemStatus(user, itemId, status);
   }
 }

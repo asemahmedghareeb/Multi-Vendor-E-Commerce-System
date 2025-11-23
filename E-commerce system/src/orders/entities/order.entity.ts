@@ -4,6 +4,7 @@ import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
 import { OrderItem } from './order-item.entity';
 import { Payment } from 'src/payments/entities/payment.entity';
+import { OrderStatus } from '../enum/order-status.enum';
 
 
 @ObjectType()
@@ -32,6 +33,10 @@ export class Order extends BaseEntity {
   @Field(() => String)
   @Column({ type: 'jsonb' }) 
   shippingAddress: any; 
+
+  @Field(() => OrderStatus)
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
+  status: OrderStatus;
 
 
   
