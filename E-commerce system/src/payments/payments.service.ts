@@ -7,6 +7,7 @@ import Stripe from 'stripe';
 import { Payment, PaymentStatus } from './entities/payment.entity';
 import { Order } from '../orders/entities/order.entity';
 import { WalletsService } from 'src/wallet/wallet.service';
+import { EmailsService } from 'src/emails/emails.service';
 
 @Injectable()
 export class PaymentsService {
@@ -17,6 +18,7 @@ export class PaymentsService {
     @InjectRepository(Order) private orderRepo: Repository<Order>,
     private configService: ConfigService,
     private readonly walletsService: WalletsService,
+    private readonly emailService: EmailsService,
   ) {
     const apiKey = this.configService.get<string>('STRIPE_SECRET_KEY');
 
@@ -83,6 +85,60 @@ export class PaymentsService {
 
     if (fullOrder) {
       await this.walletsService.processOrderRevenue(fullOrder);
+    }
+  }
+
+  async handleRefundWebhook(charge: Stripe.Charge) {
+    const stripeId =
+      typeof charge.payment_intent === 'string'
+        ? charge.payment_intent
+        : charge.payment_intent!.id;
+
+    const payment = await this.paymentRepo.findOne({
+      where: { stripePaymentId: stripeId },
+    });
+
+    if (!payment) {
+      console.error(`Payment record not found for Stripe ID: ${stripeId}`);
+      return;
+    }
+
+    payment.amountRefunded = charge.amount_refunded;
+
+    if (payment.amountRefunded >= payment.amount) {
+      payment.status = PaymentStatus.REFUNDED;
+    } else if (payment.amountRefunded > 0) {
+      payment.status = PaymentStatus.PARTIALLY_REFUNDED;
+    }
+
+    await this.paymentRepo.save(payment);
+  }
+
+  async handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
+    const payment = await this.paymentRepo.findOne({
+      where: { stripePaymentId: paymentIntent.id },
+      relations: ['order', 'order.user'],
+    });
+
+    if (!payment) return;
+
+    payment.status = PaymentStatus.FAILED;
+
+    const errorMessage =
+      paymentIntent.last_payment_error?.message || 'Unknown error';
+    payment.metadata = {
+      ...payment.metadata,
+      failure_reason: errorMessage,
+    };
+
+    await this.paymentRepo.save(payment);
+
+    if (payment.order?.user) {
+      await this.emailService.sendEmail(
+        payment.order.user.email,
+        'Payment Failed',
+        errorMessage,
+      );
     }
   }
 }

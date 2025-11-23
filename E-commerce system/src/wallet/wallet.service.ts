@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { Wallet } from './entities/wallet.entity';
 import {
   WalletTransaction,
@@ -10,6 +10,7 @@ import { User } from '../users/entities/user.entity';
 import { Transactional } from 'typeorm-transactional';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRole } from 'src/common/enums/roles.enum';
+import { OrderItem } from 'src/orders/entities/order-item.entity';
 
 @Injectable()
 export class WalletsService {
@@ -19,6 +20,8 @@ export class WalletsService {
     @InjectRepository(WalletTransaction)
     private readonly txRepo: Repository<WalletTransaction>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
+    @InjectRepository(OrderItem)
+    private readonly orderItemRepo: Repository<OrderItem>,
   ) {}
 
   @Transactional()
@@ -90,8 +93,6 @@ export class WalletsService {
         await this.txRepo.save(adminTx);
       }
     }
-
-    console.log(`Wallet Splits Completed.`);
   }
 
   async getMyWallet(userId: string): Promise<Wallet> {
@@ -108,5 +109,69 @@ export class WalletsService {
     }
 
     return wallet!;
+  }
+
+  @Transactional()
+  async refundSpecificItems(
+    order: Order,
+    itemsToRefund: { orderItem: OrderItem; quantity: number }[],
+  ) {
+    const superAdmin = await this.userRepo.findOne({
+      where: { role: UserRole.SUPER_ADMIN },
+      relations: ['wallet'],
+    });
+
+    for (const { orderItem, quantity } of itemsToRefund) {
+      const remainingQty = orderItem.quantity - orderItem.refundedQuantity;
+
+      if (quantity > remainingQty) {
+        console.warn(
+          `Skipping Item ${orderItem.id}: Requested ${quantity} but only ${remainingQty} remaining.`,
+        );
+        continue;
+      }
+
+      const vendorUser = await this.userRepo.findOne({
+        where: { vendorProfile: { id: orderItem.vendorId } },
+        relations: ['wallet', 'vendorProfile'],
+      });
+
+      if (!vendorUser?.wallet || !vendorUser?.vendorProfile) continue;
+
+      const itemRefundAmount = orderItem.priceAtPurchase * quantity;
+
+      const rate = Number(vendorUser.vendorProfile.commissionRate) / 100;
+      const adminShare = Math.floor(itemRefundAmount * rate);
+      const vendorShare = itemRefundAmount - adminShare;
+
+      vendorUser.wallet.balance -= vendorShare;
+      await this.walletRepo.save(vendorUser.wallet);
+
+      const vendorTx = this.txRepo.create({
+        wallet: vendorUser.wallet,
+        order: order,
+        amount: -vendorShare,
+        type: TransactionType.REFUND,
+        description: `Refund: ${quantity}x ${orderItem.product.name}`,
+      });
+      await this.txRepo.save(vendorTx);
+
+      if (superAdmin?.wallet) {
+        superAdmin.wallet.balance -= adminShare;
+        await this.walletRepo.save(superAdmin.wallet);
+
+        const adminTx = this.txRepo.create({
+          wallet: superAdmin.wallet,
+          order: order,
+          amount: -adminShare,
+          type: TransactionType.REFUND,
+          description: `Commission Refund: ${quantity}x ${orderItem.product.name}`,
+        });
+        await this.txRepo.save(adminTx);
+      }
+
+      orderItem.refundedQuantity += quantity;
+      await this.orderItemRepo.save(orderItem);
+    }
   }
 }

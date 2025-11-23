@@ -65,6 +65,10 @@ export class OrderItem extends BaseEntity {
   @RelationId((item: OrderItem) => item.vendor)
   vendorId: string;
 
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  refundedQuantity: number;
+
   @Field(() => [OrderTracking], { nullable: true })
   @OneToMany(() => OrderTracking, (tracking) => tracking.orderItem)
   trackingHistory: OrderTracking[];

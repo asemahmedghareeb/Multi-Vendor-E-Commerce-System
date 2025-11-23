@@ -13,7 +13,7 @@ import express from 'express';
 @Controller('payments')
 export class PaymentsController {
   private stripe: Stripe;
- 
+
   constructor(
     private readonly paymentsService: PaymentsService,
     private readonly configService: ConfigService,
@@ -56,8 +56,17 @@ export class PaymentsController {
 
       await this.paymentsService.handlePaymentSuccess(paymentIntent);
     }
-    
 
+    if (event.type == 'charge.refunded') {
+      const charge = event.data.object as Stripe.Charge;
+      console.log(charge.payment_intent);
+      await this.paymentsService.handleRefundWebhook(charge);
+    }
+    if (event.type === 'payment_intent.payment_failed') {
+      const failedIntent = event.data.object as Stripe.PaymentIntent;
+      console.log('Payment Failed:', failedIntent.id);
+      await this.paymentsService.handlePaymentFailure(failedIntent);
+    }
     return { received: true };
   }
 }

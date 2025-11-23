@@ -56,7 +56,19 @@ type OrderItem {
   order: Order!
   product: Product!
   vendor: Vendor!
+  refundedQuantity: Int!
   trackingHistory: [OrderTracking!]
+}
+
+type Refund {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  amount: Float!
+  reason: String!
+  status: String!
+  stripeRefundId: String!
+  payment: Payment!
 }
 
 type Payment {
@@ -69,6 +81,7 @@ type Payment {
   amount: Float!
   amountCaptured: Float!
   amountRefunded: Float!
+  refunds: [Refund!]
   currency: String!
   provider: String!
   status: PaymentStatus!
@@ -136,6 +149,17 @@ enum UserRole {
   CLIENT
 }
 
+type Review {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  rating: Int!
+  comment: String!
+  user: User!
+  vendor: Vendor!
+  order: Order!
+}
+
 type Vendor {
   id: ID!
   createdAt: DateTime!
@@ -145,6 +169,9 @@ type Vendor {
   status: String!
   commissionRate: Float!
   user: User!
+  products: [Product!]!
+  orders: [OrderItem!]!
+  reviews: [Review!]!
 }
 
 type AuthResponse {
@@ -169,6 +196,7 @@ type Cart {
   updatedAt: DateTime!
   user: User!
   items: [CartItem!]!
+  totalAmount: Float!
 }
 
 type CartItem {
@@ -200,17 +228,6 @@ type Follow {
   followerId: String!
   vendor: Vendor!
   vendorId: String!
-}
-
-type Review {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  rating: Int!
-  comment: String!
-  user: User!
-  vendor: Vendor!
-  order: Order!
 }
 
 type Query {
@@ -254,6 +271,8 @@ type Mutation {
   createProduct(createProductInput: CreateProductInput!): Product!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   removeProduct(id: String!): Boolean!
+  refundItems(input: CreateRefundInput!): Refund!
+  refundFullOrder(paymentId: String!, reason: String): Refund!
   createOrder(input: CreateOrderInput!): Order!
   updateItemStatus(itemId: String!, status: OrderStatus!): OrderItem!
   addToCart(input: AddToCartInput!): Cart!
@@ -317,6 +336,17 @@ input UpdateProductInput {
   categoryId: String
   images: [String!]
   id: String!
+}
+
+input CreateRefundInput {
+  paymentId: String!
+  items: [RefundItemInput!]!
+  reason: String
+}
+
+input RefundItemInput {
+  orderItemId: String!
+  quantity: Int!
 }
 
 input CreateOrderInput {

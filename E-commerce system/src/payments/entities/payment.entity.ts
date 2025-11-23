@@ -1,7 +1,15 @@
 import { ObjectType, Field, Float, registerEnumType } from '@nestjs/graphql';
-import { Entity, Column, OneToOne, JoinColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  OneToOne,
+  JoinColumn,
+  Index,
+  OneToMany,
+} from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { Order } from '../../orders/entities/order.entity';
+import { Refund } from './refund.entity';
 
 export enum PaymentStatus {
   PENDING = 'PENDING',
@@ -59,6 +67,10 @@ export class Payment extends BaseEntity {
     transformer: { to: (v) => v, from: (v) => parseInt(v, 10) },
   })
   amountRefunded: number;
+
+  @Field(() => [Refund], { nullable: true })
+  @OneToMany(() => Refund, (refund) => refund.payment)
+  refunds: Refund[];
 
   @Field()
   @Column({ default: 'USD' })

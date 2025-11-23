@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -14,7 +15,7 @@ import { IPaginatedType } from 'src/common/dto/paginated-output';
 import { UpdateProductInput } from './dto/update-product.input';
 import { Role } from 'src/auth/enums/role.enum';
 import { GetProductsFilterInput } from './dto/products-filter.input';
-import { I18nContext, I18nService } from 'nestjs-i18n';
+import { I18nService } from 'nestjs-i18n';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -138,7 +139,6 @@ export class ProductsService {
       });
     }
 
-
     if (search) {
       qb.andWhere(
         new Brackets((sub) => {
@@ -173,8 +173,6 @@ export class ProductsService {
       totalPages: Math.ceil(totalItems / limit),
     };
   }
-
-
 
   async findOne(id: string): Promise<Product | null> {
     const product: Product | null = await this.productRepo.findOne({

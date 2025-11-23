@@ -1,4 +1,3 @@
-import { Role } from 'src/auth/enums/role.enum';
 import {
   Injectable,
   BadRequestException,
@@ -83,9 +82,7 @@ export class AuthService {
   async login(input: LoginInput) {
     const user = await this.userRepo.findOne({ where: { email: input.email } });
     if (!user || !(await bcrypt.compare(input.password, user.password))) {
-      throw new UnauthorizedException(
-        this.i18n.t('events.auth.INVALID_CREDENTIALS'),
-      );
+      throw new UnauthorizedException('events.auth.INVALID_CREDENTIALS');
     }
 
     if (!user.isVerified) {
@@ -131,7 +128,9 @@ export class AuthService {
 
       const payload = ticket.getPayload();
       if (!payload) {
-        throw new UnauthorizedException(this.i18n.t('events.auth.INVALID_GOOGLE_CODE'));
+        throw new UnauthorizedException(
+          this.i18n.t('events.auth.INVALID_GOOGLE_CODE'),
+        );
       }
 
       return {
@@ -142,7 +141,9 @@ export class AuthService {
       };
     } catch (error) {
       console.error('Google Exchange Error:', error);
-      throw new UnauthorizedException(this.i18n.t('events.auth.INVALID_GOOGLE_CODE'));
+      throw new UnauthorizedException(
+        this.i18n.t('events.auth.INVALID_GOOGLE_CODE'),
+      );
     }
   }
 

@@ -6,9 +6,18 @@ import { WalletsService } from './wallet.service';
 import { Order } from 'src/orders/entities/order.entity';
 import { User } from 'src/users/entities/user.entity';
 import { WalletsResolver } from './wallet.resolver';
+import { OrderItem } from 'src/orders/entities/order-item.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Wallet, WalletTransaction, Order, User])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Wallet,
+      WalletTransaction,
+      Order,
+      User,
+      OrderItem,
+    ]),
+  ],
   providers: [WalletsResolver, WalletsService],
   exports: [WalletsService],
 })

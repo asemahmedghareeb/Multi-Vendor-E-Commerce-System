@@ -36,7 +36,7 @@ export class Product extends BaseEntity {
 
   
   @Field(() => Vendor)
-  @ManyToOne(() => Vendor)
+  @ManyToOne(() => Vendor, (vendor) => vendor.products)
   @JoinColumn({ name: 'vendorId' })
   vendor: Vendor;
   
