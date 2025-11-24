@@ -33,7 +33,6 @@ import { ReviewsLoader } from './reviews.loader';
   ],
   providers: [
     UserLoader,
-    VendorLoader,
     CategoryLoader,
     ProductLoader,
     VendorLoader,
@@ -43,7 +42,6 @@ import { ReviewsLoader } from './reviews.loader';
   ],
   exports: [
     UserLoader,
-    VendorLoader,
     CategoryLoader,
     ProductLoader,
     VendorLoader,
