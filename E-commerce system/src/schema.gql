@@ -9,12 +9,18 @@ type Category {
   name: String!
   parent: Category
   children: [Category!]
+  products(pagination: PaginationInput): PaginatedProductOutput!
 }
 
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input PaginationInput {
+  page: Int! = 1
+  limit: Int! = 10
+}
 
 type Product {
   id: ID!
@@ -168,10 +174,12 @@ type Vendor {
   bio: String!
   status: String!
   commissionRate: Float!
+  averageRating: Float!
+  reviewsCount: Int!
   user: User!
-  products: [Product!]!
   orders: [OrderItem!]!
   reviews: [Review!]!
+  products(pagination: PaginationInput): PaginatedProductOutput!
 }
 
 type AuthResponse {
@@ -208,6 +216,18 @@ type CartItem {
   productId: String!
 }
 
+type PaginatedOrderOutput {
+  items: [Order!]!
+  totalItems: Int!
+  totalPages: Int!
+}
+
+type PaginatedVendorOutput {
+  items: [Vendor!]!
+  totalItems: Int!
+  totalPages: Int!
+}
+
 type PaginatedCategoryOutput {
   items: [Category!]!
   totalItems: Int!
@@ -230,20 +250,30 @@ type Follow {
   vendorId: String!
 }
 
+type PaginatedReviewOutput {
+  items: [Review!]!
+  totalItems: Int!
+  totalPages: Int!
+}
+
 type Query {
   products(filter: GetProductsFilterInput): PaginatedProductOutput!
   product(id: String!): Product!
   myWallet: Wallet
+  orders(pagination: PaginationInput): PaginatedOrderOutput!
   myOrders: [Order!]!
   vendorOrders: [OrderItem!]!
+  order(id: String!): Order!
   myCart: Cart!
+  vendors(pagination: PaginationInput): PaginatedVendorOutput!
+  pendingVendors: [Vendor!]!
   categories(pagination: PaginationInput): PaginatedCategoryOutput!
   category(id: String!): Category!
   users(pagination: PaginationInput): PaginatedUserOutput!
   user(id: String!): User!
   me: User!
   myFollows: [Follow!]!
-  vendorReviews(vendorId: String!): [Review!]!
+  vendorReviews(vendorId: String!, pagination: PaginationInput): PaginatedReviewOutput!
 }
 
 input GetProductsFilterInput {
@@ -254,11 +284,6 @@ input GetProductsFilterInput {
   categoryName: String
   minPrice: Float
   maxPrice: Float
-}
-
-input PaginationInput {
-  page: Int! = 1
-  limit: Int! = 10
 }
 
 type Mutation {

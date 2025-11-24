@@ -15,7 +15,7 @@ import { Vendor } from 'src/vendors/entities/vendor.entity';
 import { Category } from 'src/categories/entities/category.entity';
 import { CategoryLoader } from 'src/dataLoaders/category.loader';
 
-const paginatedProduct = genericPaginated(Product);
+export const paginatedProduct = genericPaginated(Product);
 @Resolver(() => Product)
 export class ProductsResolver {
   constructor(

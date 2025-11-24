@@ -13,9 +13,10 @@ import { CreateProductInput } from './dto/create-product.input';
 import { Category } from '../categories/entities/category.entity';
 import { IPaginatedType } from 'src/common/dto/paginated-output';
 import { UpdateProductInput } from './dto/update-product.input';
-import { Role } from 'src/auth/enums/role.enum';
+import { Role } from 'src/auth/guards/role.enum';
 import { GetProductsFilterInput } from './dto/products-filter.input';
 import { I18nService } from 'nestjs-i18n';
+import { PaginationInput } from 'src/common/dto/pagination.input';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -57,65 +58,6 @@ export class ProductsService {
     return product;
   }
 
-  // async findAll(
-  //   input: GetProductsFilterInput,
-  // ): Promise<IPaginatedType<Product>> {
-  //   const {
-  //     page,
-  //     limit,
-  //     search,
-  //     categoryId,
-  //     categoryName,
-  //     minPrice,
-  //     maxPrice,
-  //   } = input;
-  //   const skip = (page - 1) * limit;
-
-  //   const qb = this.productRepo.createQueryBuilder('product');
-
-  //   qb.leftJoinAndSelect('product.vendor', 'vendor');
-  //   qb.leftJoinAndSelect('product.category', 'category');
-
-  //   if (search) {
-  //     qb.andWhere(
-  //       new Brackets((sub) => {
-  //         sub
-  //           .where('product.name ILIKE :search', { search: `%${search}%` })
-  //           .orWhere('product.description ILIKE :search', {
-  //             search: `%${search}%`,
-  //           });
-  //       }),
-  //     );
-  //   }
-
-  //   if (categoryId) {
-  //     qb.andWhere('product.categoryId = :categoryId', { categoryId });
-  //   }
-
-  //   if (categoryName) {
-  //     qb.andWhere('category.name ILIKE :categoryName', {
-  //       categoryName: `%${categoryName}%`,
-  //     });
-  //   }
-
-  //   if (minPrice !== undefined) {
-  //     qb.andWhere('product.price >= :minPrice', { minPrice: minPrice * 100 });
-  //   }
-  //   if (maxPrice !== undefined) {
-  //     qb.andWhere('product.price <= :maxPrice', { maxPrice: maxPrice * 100 });
-  //   }
-
-  //   qb.orderBy('product.createdAt', 'DESC');
-  //   qb.skip(skip).take(limit);
-
-  //   const [items, totalItems] = await qb.getManyAndCount();
-
-  //   return {
-  //     items,
-  //     totalItems,
-  //     totalPages: Math.ceil(totalItems / limit),
-  //   };
-  // }
   async findAll(
     input: GetProductsFilterInput,
   ): Promise<IPaginatedType<Product>> {
@@ -243,5 +185,49 @@ export class ProductsService {
     if (!vendorProfile || product.vendor.id !== vendorProfile.id) {
       throw new ForbiddenException(this.i18n.t('events.product.NOT_OWNER'));
     }
+  }
+
+  async findAllByVendor(
+    vendorId: string,
+    pagination: PaginationInput,
+  ): Promise<IPaginatedType<Product>> {
+    const { page, limit } = pagination;
+    const skip = (page - 1) * limit;
+
+    const [items, totalItems] = await this.productRepo.findAndCount({
+      where: { vendor: { id: vendorId } },
+      skip,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      items,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+    };
+  }
+
+
+  
+  async findAllByCategory(
+    categoryId: string,
+    pagination: PaginationInput,
+  ): Promise<IPaginatedType<Product>> {
+    const { page, limit } = pagination;
+    const skip = (page - 1) * limit;
+
+    const [items, totalItems] = await this.productRepo.findAndCount({
+      where: { category: { id: categoryId } },
+      skip,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      items,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+    };
   }
 }

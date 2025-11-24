@@ -12,6 +12,10 @@ import { User } from 'src/users/entities/user.entity';
 import { WalletTransactionsLoader } from './wallet-transactions.loader';
 import { Wallet } from 'src/wallet/entities/wallet.entity';
 import { WalletTransaction } from 'src/wallet/entities/wallet-transaction.entity';
+import { OrderItemsLoader } from './orderItem.loader';
+import { OrderItem } from 'src/orders/entities/order-item.entity';
+import { Review } from 'src/reviews/entities/review.entity';
+import { ReviewsLoader } from './reviews.loader';
 @Global()
 @Module({
   imports: [
@@ -23,6 +27,8 @@ import { WalletTransaction } from 'src/wallet/entities/wallet-transaction.entity
       Product,
       Wallet,
       WalletTransaction,
+      OrderItem,
+      Review,
     ]),
   ],
   providers: [
@@ -32,6 +38,8 @@ import { WalletTransaction } from 'src/wallet/entities/wallet-transaction.entity
     ProductLoader,
     VendorLoader,
     WalletTransactionsLoader,
+    OrderItemsLoader,
+    ReviewsLoader,
   ],
   exports: [
     UserLoader,
@@ -40,6 +48,8 @@ import { WalletTransaction } from 'src/wallet/entities/wallet-transaction.entity
     ProductLoader,
     VendorLoader,
     WalletTransactionsLoader,
+    OrderItemsLoader,
+    ReviewsLoader,
   ],
 })
 export class DataLoadersModule {}

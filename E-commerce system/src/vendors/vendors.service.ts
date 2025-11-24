@@ -6,18 +6,35 @@ import { Vendor } from './entities/vendor.entity';
 import { VendorStatus } from './entities/vendor.entity';
 import { EmailsService } from 'src/emails/emails.service';
 import { I18nService } from 'nestjs-i18n';
-import { User } from 'src/users/entities/user.entity';
+import { IPaginatedType } from 'src/common/dto/paginated-output';
+import { PaginationInput } from 'src/common/dto/pagination.input';
 
 @Injectable()
-export class UsersService {
+export class VendorService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     @InjectRepository(Vendor)
     private readonly vendorRepo: Repository<Vendor>,
     private readonly emailService: EmailsService,
     private readonly i18n: I18nService,
   ) {}
+
+  async findAll(pagination: PaginationInput): Promise<IPaginatedType<Vendor>> {
+    const { page, limit } = pagination;
+    const skip = (page - 1) * limit;
+
+    const [items, totalItems] = await this.vendorRepo.findAndCount({
+      skip,
+      take: limit,
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      items,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+    };
+  }
 
   async updateVendorStatus(
     userId: string,
@@ -27,11 +44,23 @@ export class UsersService {
       where: { user: { id: userId } },
       relations: ['user'],
     });
-    if (!vendor) throw new NotFoundException(this.i18n.t('events.vendor.NOT_FOUND'));
+    if (!vendor)
+      throw new NotFoundException(this.i18n.t('events.vendor.NOT_FOUND'));
 
     vendor.status = status;
-    await this.emailService.sendEmail(vendor.user.email, 'Vendor Status Updated', 'Your vendor status has been updated to ' + status);
+    await this.emailService.sendEmail(
+      vendor.user.email,
+      'Vendor Status Updated',
+      'Your vendor status has been updated to ' + status,
+    );
 
     return this.vendorRepo.save(vendor);
+  }
+
+  async findPendingVendors(): Promise<Vendor[]> {
+    return this.vendorRepo.find({
+      where: { status: VendorStatus.PENDING },
+      order: { createdAt: 'ASC' },
+    });
   }
 }
