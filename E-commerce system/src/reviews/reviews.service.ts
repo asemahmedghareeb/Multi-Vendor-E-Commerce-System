@@ -10,14 +10,34 @@ import { Review } from './entities/review.entity';
 import { CreateReviewInput } from './dto/create-review.input';
 import { Order } from '../orders/entities/order.entity';
 import { UpdateReviewInput } from './dto/update-review.input';
+import { Vendor } from 'src/vendors/entities/vendor.entity';
+import { PaginationInput } from 'src/common/dto/pagination.input';
+import { IPaginatedType } from 'src/common/dto/paginated-output';
 
 @Injectable()
 export class ReviewsService {
   constructor(
     @InjectRepository(Review) private reviewRepo: Repository<Review>,
     @InjectRepository(Order) private orderRepo: Repository<Order>,
+    @InjectRepository(Vendor) private vendorRepo: Repository<Vendor>,
   ) {}
 
+  private async updateVendorStats(vendorId: string) {
+    const result = await this.reviewRepo
+      .createQueryBuilder('review')
+      .select('AVG(review.rating)', 'avg')
+      .addSelect('COUNT(review.id)', 'count')
+      .where('review.vendor = :vendorId', { vendorId })
+      .getRawOne();
+
+    const avg = result && result.avg ? parseFloat(result.avg) : 0;
+    const count = result && result.count ? parseInt(result.count, 10) : 0;
+
+    await this.vendorRepo.update(vendorId, {
+      averageRating: avg,
+      reviewsCount: count,
+    });
+  }
   async create(userId: string, input: CreateReviewInput): Promise<Review> {
     const existing = await this.reviewRepo.findOne({
       where: {
@@ -54,17 +74,34 @@ export class ReviewsService {
       comment: input.comment,
     });
 
-    return this.reviewRepo.save(review);
-  }
+    const savedReview = await this.reviewRepo.save(review);
 
-  async findByVendor(vendorId: string) {
-    return this.reviewRepo.find({
+    await this.updateVendorStats(savedReview.vendorId);
+
+    return savedReview;
+  }
+  async findByVendor(
+    vendorId: string,
+    pagination: PaginationInput,
+  ): Promise<IPaginatedType<Review>> {
+    const { page, limit } = pagination;
+
+    const skip = (page - 1) * limit;
+
+    const [items, totalItems] = await this.reviewRepo.findAndCount({
       where: { vendor: { id: vendorId } },
+      skip,
+      take: limit,
       order: { createdAt: 'DESC' },
-      relations: ['user'],
+      // relations: ['user'],
     });
-  }
 
+    return {
+      items,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+    };
+  }
   async update(userId: string, input: UpdateReviewInput): Promise<Review> {
     const review = await this.reviewRepo.findOne({
       where: { id: input.id },
@@ -79,7 +116,10 @@ export class ReviewsService {
     if (input.rating) review.rating = input.rating;
     if (input.comment) review.comment = input.comment;
 
-    return this.reviewRepo.save(review);
+    const savedReview = await this.reviewRepo.save(review);
+    await this.updateVendorStats(savedReview.vendorId);
+
+    return savedReview;
   }
 
   async remove(userId: string, reviewId: string): Promise<boolean> {
@@ -91,7 +131,10 @@ export class ReviewsService {
       throw new ForbiddenException('events.vendor.NOT_OWNER');
     }
 
+    const vendorId = review.vendorId;
     await this.reviewRepo.remove(review);
+    await this.updateVendorStats(vendorId);
+
     return true;
   }
 }

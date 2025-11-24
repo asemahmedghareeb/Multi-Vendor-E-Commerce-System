@@ -18,6 +18,9 @@ import { PaymentsService } from 'src/payments/payments.service';
 import { OrderTracking } from './entities/order-tracking.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Vendor } from 'src/vendors/entities/vendor.entity';
+import { PaginationInput } from 'src/common/dto/pagination.input';
+import { IPaginatedType } from 'src/common/dto/paginated-output';
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -41,6 +44,26 @@ export class OrdersService {
     private readonly cartRepo: Repository<Cart>,
     private readonly paymentsService: PaymentsService,
   ) {}
+
+  async findAllOrders(
+    pagination: PaginationInput,
+  ): Promise<IPaginatedType<Order>> {
+    const { page, limit } = pagination;
+    const skip = (page - 1) * limit;
+
+    const [items, totalItems] = await this.orderRepo.findAndCount({
+      relations: ['payment', 'user'],
+      order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
+    });
+
+    return {
+      items,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+    };
+  }
 
   @Transactional()
   async createOrder(
@@ -71,8 +94,6 @@ export class OrdersService {
           args: { count: item.product.inventoryCount },
         });
       }
-
-
 
       totalAmount += item.product.price * item.quantity;
 
@@ -124,8 +145,10 @@ export class OrdersService {
     return savedOrder;
   }
 
-
   async getMyOrders(userId: string): Promise<Order[]> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('events.user.NOT_FOUND');
+
     return this.orderRepo.find({
       where: { user: { id: userId } },
       relations: ['items', 'items.product', 'payment'],
@@ -134,11 +157,9 @@ export class OrdersService {
   }
 
   async getVendorOrders(userId: string): Promise<OrderItem[]> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
-
-    if (!user) throw new NotFoundException('events.user.NOT_FOUND');
-
-    const vendor = await this.vendorRepo.findOne({ where: { user: { id: userId } } });
+    const vendor = await this.vendorRepo.findOne({
+      where: { user: { id: userId } },
+    });
     if (!vendor) throw new NotFoundException('events.vendor.NOT_FOUND');
 
     return this.orderItemRepo.find({
@@ -168,7 +189,7 @@ export class OrdersService {
   }
 
   async updateOrderItemStatus(
-    user: { userId: string, role: string },
+    user: { userId: string; role: string },
     itemId: string,
     newStatus: OrderStatus,
   ): Promise<OrderItem> {
@@ -179,7 +200,7 @@ export class OrdersService {
 
     if (!item) throw new NotFoundException('events.order.ITEM_NOT_FOUND');
 
-    if (item.vendor.userId !== user.userId  || user.role !== 'SUPER_ADMIN') {
+    if (item.vendor.userId !== user.userId || user.role !== 'SUPER_ADMIN') {
       throw new ForbiddenException('events.vendor.NOT_OWNER');
     }
 

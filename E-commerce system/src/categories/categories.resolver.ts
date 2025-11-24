@@ -14,15 +14,19 @@ import { CreateCategoryInput } from './dto/create-category.input';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { Role } from 'src/auth/enums/role.enum';
+import { Role } from 'src/auth/guards/role.enum';
 import { genericPaginated } from '../common/dto/paginated-output';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { CategoryLoader } from 'src/dataLoaders/category.loader';
+import { paginatedProduct } from 'src/products/products.resolver';
+import { ProductsService } from 'src/products/products.service';
 const paginatedCategory = genericPaginated(Category);
 @Resolver(() => Category)
 export class CategoriesResolver {
   constructor(
     private readonly categoriesService: CategoriesService,
+    private readonly productsService: ProductsService,
+
     private readonly categoryLoader: CategoryLoader,
   ) {}
 
@@ -77,4 +81,15 @@ export class CategoriesResolver {
   async children(@Parent() category: Category) {
     return this.categoryLoader.batchChildren.load(category.id);
   }
+
+  @ResolveField(() => paginatedProduct)
+  async products(
+    @Parent() category: Category,
+    @Args('pagination', { nullable: true }) pagination?: PaginationInput,
+  ) {
+    const input = pagination || { page: 1, limit: 10 };
+
+    return this.productsService.findAllByCategory(category.id, input);
+  }
 }
+ 

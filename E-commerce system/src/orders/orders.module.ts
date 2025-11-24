@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import { OrdersResolver } from './orders.resolver';
+import { OrderItemResolver, OrdersResolver } from './orders.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
@@ -13,6 +13,7 @@ import { OrderTracking } from './entities/order-tracking.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Vendor } from 'src/vendors/entities/vendor.entity';
 import { PaymentsModule } from 'src/payments/payments.module';
+import { DataLoadersModule } from 'src/dataLoaders/dataLoaders.module';
 
 @Module({
   imports: [
@@ -28,9 +29,10 @@ import { PaymentsModule } from 'src/payments/payments.module';
       Payment,
     ]),
     CartModule,
-    PaymentsModule
+    PaymentsModule,
+    DataLoadersModule
   ],
-  providers: [OrdersResolver, OrdersService],
+  providers: [OrdersResolver, OrdersService,OrderItemResolver],
   exports: [OrdersService],
 })
 export class OrdersModule {}

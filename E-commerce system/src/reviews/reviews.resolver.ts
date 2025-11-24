@@ -17,7 +17,10 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { Vendor } from 'src/vendors/entities/vendor.entity';
 import { UpdateReviewInput } from './dto/update-review.input';
+import { genericPaginated } from 'src/common/dto/paginated-output';
+import { PaginationInput } from 'src/common/dto/pagination.input';
 
+const paginatedReviews = genericPaginated(Review);
 @Resolver(() => Review)
 export class ReviewsResolver {
   constructor(
@@ -35,23 +38,30 @@ export class ReviewsResolver {
     return this.reviewsService.create(user.userId, input);
   }
 
-  @Query(() => [Review], { name: 'vendorReviews' })
-  async vendorReviews(@Args('vendorId') vendorId: string) {
-    return this.reviewsService.findByVendor(vendorId);
+  @Query(() => paginatedReviews)
+  async vendorReviews(
+    @Args('vendorId') vendorId: string,
+    @Args('pagination', { nullable: true }) pagination?: PaginationInput,
+  ) {
+      const input = pagination || { page: 1, limit: 10 };
+    return this.reviewsService.findByVendor(vendorId, input);
   }
 
   @Mutation(() => Review)
   @UseGuards(AuthGuard)
   async updateReview(
     @Args('input') input: UpdateReviewInput,
-    @CurrentUser() user: { userId: string, role: string },
+    @CurrentUser() user: { userId: string; role: string },
   ) {
     return this.reviewsService.update(user.userId, input);
   }
 
   @Mutation(() => Boolean)
   @UseGuards(AuthGuard)
-  async removeReview(@Args('id') id: string, @CurrentUser() user: { userId: string }) {
+  async removeReview(
+    @Args('id') id: string,
+    @CurrentUser() user: { userId: string },
+  ) {
     return this.reviewsService.remove(user.userId, id);
   }
 

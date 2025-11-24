@@ -14,7 +14,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Role } from 'src/auth/enums/role.enum';
+import { Role } from 'src/auth/guards/role.enum';
 import { Vendor } from 'src/vendors/entities/vendor.entity';
 import { genericPaginated } from 'src/common/dto/paginated-output';
 import { UpdateUserInput } from './dto/updated-user.dto';
