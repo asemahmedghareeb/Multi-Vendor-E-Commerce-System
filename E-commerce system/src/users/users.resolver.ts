@@ -18,6 +18,7 @@ import { Vendor } from 'src/vendors/entities/vendor.entity';
 import { genericPaginated } from 'src/common/dto/paginated-output';
 import { UpdateUserInput } from './dto/updated-user.dto';
 import { Role } from 'src/auth/guards/role.enum';
+import { RegisterDeviceInput } from './dto/register-device.input';
 
 const paginatedCategory = genericPaginated(User);
 @Resolver(() => User)
@@ -60,6 +61,21 @@ export class UsersResolver {
   @UseGuards(AuthGuard, RolesGuard)
   async removeUser(@Args('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(AuthGuard)
+  async registerDevice(
+    @Args('input') input: RegisterDeviceInput,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.usersService.registerDevice(user.userId, input);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(AuthGuard)
+  async unregisterDevice(@Args('token') token: string) {
+    return this.usersService.removeDevice(token);
   }
 
   @ResolveField(() => Vendor, { nullable: true })

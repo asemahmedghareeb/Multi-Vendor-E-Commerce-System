@@ -14,6 +14,7 @@ import { Cart } from 'src/cart/entities/cart.entity';
 import { Vendor } from 'src/vendors/entities/vendor.entity';
 import { PaymentsModule } from 'src/payments/payments.module';
 import { DataLoadersModule } from 'src/dataLoaders/dataLoaders.module';
+import { Device } from 'src/users/entities/device.entity';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { DataLoadersModule } from 'src/dataLoaders/dataLoaders.module';
       User,
       Vendor,
       Payment,
+      Device,
     ]),
     CartModule,
     PaymentsModule,

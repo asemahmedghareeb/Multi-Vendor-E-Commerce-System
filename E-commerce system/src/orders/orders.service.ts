@@ -20,6 +20,8 @@ import { Cart } from 'src/cart/entities/cart.entity';
 import { Vendor } from 'src/vendors/entities/vendor.entity';
 import { PaginationInput } from 'src/common/dto/pagination.input';
 import { IPaginatedType } from 'src/common/dto/paginated-output';
+import { Device } from 'src/users/entities/device.entity';
+import { FcmService } from 'src/fcm/fcm.service';
 
 @Injectable()
 export class OrdersService {
@@ -42,7 +44,10 @@ export class OrdersService {
     private readonly trackingRepo: Repository<OrderTracking>,
     @InjectRepository(Cart)
     private readonly cartRepo: Repository<Cart>,
+    @InjectRepository(Device)
+    private readonly deviceRepo: Repository<Device>,
     private readonly paymentsService: PaymentsService,
+    private readonly fcmService: FcmService,
   ) {}
 
   async findAllOrders(
@@ -193,14 +198,14 @@ export class OrdersService {
     itemId: string,
     newStatus: OrderStatus,
   ): Promise<OrderItem> {
-    const item = await this.orderItemRepo.findOne({
+ const item = await this.orderItemRepo.findOne({
       where: { id: itemId },
-      relations: ['vendor', 'vendor.user'],
+      relations: ['vendor', 'vendor.user', 'order'], 
     });
 
     if (!item) throw new NotFoundException('events.order.ITEM_NOT_FOUND');
 
-    if (item.vendor.userId !== user.userId || user.role !== 'SUPER_ADMIN') {
+    if (item.vendor.userId !== user.userId && user.role !== 'SUPER_ADMIN') {
       throw new ForbiddenException('events.vendor.NOT_OWNER');
     }
 
@@ -212,6 +217,18 @@ export class OrdersService {
       status: newStatus,
       remarks: 'Updated by vendor',
     });
+
+    const devices = await this.deviceRepo.find({
+      where: { user: { id: item.order.userId } },
+    });
+
+    for (const device of devices) {
+      await this.fcmService.queueNotification({
+        deviceId: device.fcmToken,
+        title: 'Order Update',
+        body: `Your item is now ${newStatus}`,
+      });
+    }
 
     return savedItem;
   }
