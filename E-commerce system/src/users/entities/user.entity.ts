@@ -2,8 +2,10 @@ import { Entity, Column, OneToOne, RelationId } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { UserRole } from '../../common/enums/roles.enum';
-import { Vendor } from 'src/vendors/entities/vendor.entity';
+import { Vendor } from '../../vendors/entities/vendor.entity';
 import { Wallet } from 'src/wallet/entities/wallet.entity';
+import { Wishlist } from 'src/wishlist/entities/wishlist.entity';
+import { Cart } from 'src/cart/entities/cart.entity';
 
 @ObjectType()
 @Entity('users')
@@ -35,6 +37,15 @@ export class User extends BaseEntity {
   @RelationId((user: User) => user.vendorProfile)
   vendorId?: string;
 
+  @Field()
   @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true })
   wallet: Wallet;
+
+  @Field()
+  @OneToOne(() => Cart, (cart) => cart.user)
+  cart: Cart;
+
+  @Field()
+  @OneToOne(() => Wishlist, (wishlist) => wishlist.user)
+  wishlist: Wishlist;
 }

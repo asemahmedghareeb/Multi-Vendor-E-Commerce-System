@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config'; // Assuming you use ConfigService
+import { ConfigService } from '@nestjs/config'; 
 
 @Injectable()
 export class RefreshTokenGuard implements CanActivate {
@@ -16,7 +16,6 @@ export class RefreshTokenGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Get the request object from the GraphQL context
     const gqlCtx = GqlExecutionContext.create(context);
     const req = gqlCtx.getContext().req;
 
@@ -35,7 +34,7 @@ export class RefreshTokenGuard implements CanActivate {
       throw new UnauthorizedException('Invalid or expired refresh token.');
     }
 
-    return true; // Token is valid, allow access
+    return true; 
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

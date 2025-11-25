@@ -2,7 +2,7 @@ import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { Refund } from './entities/refund.entity';
 import { RefundsService } from './refund.service';
-import { Role } from 'src/auth/role.enum';
+import { Role } from 'src/auth/guards/role.enum';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';

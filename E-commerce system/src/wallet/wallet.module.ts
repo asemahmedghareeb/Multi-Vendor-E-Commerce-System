@@ -7,6 +7,7 @@ import { Order } from 'src/orders/entities/order.entity';
 import { User } from 'src/users/entities/user.entity';
 import { WalletsResolver } from './wallet.resolver';
 import { OrderItem } from 'src/orders/entities/order-item.entity';
+import { Vendor } from 'src/vendors/entities/vendor.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { OrderItem } from 'src/orders/entities/order-item.entity';
       Order,
       User,
       OrderItem,
+      Vendor,
     ]),
   ],
   providers: [WalletsResolver, WalletsService],

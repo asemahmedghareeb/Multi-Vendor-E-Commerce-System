@@ -140,6 +140,42 @@ type Wallet {
   transactions: [WalletTransaction!]!
 }
 
+type WishlistItem {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  wishlistId: String!
+  product: Product!
+  productId: String!
+}
+
+type Wishlist {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+  items: [WishlistItem!]!
+}
+
+type CartItem {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  quantity: Int!
+  product: Product!
+  productId: String!
+}
+
+type Cart {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User!
+  items: [CartItem!]!
+  totalAmount: Float!
+}
+
 type User {
   id: ID!
   createdAt: DateTime!
@@ -147,6 +183,9 @@ type User {
   email: String!
   role: UserRole!
   vendorProfile: Vendor
+  wallet: Wallet!
+  cart: Cart!
+  wishlist: Wishlist!
 }
 
 enum UserRole {
@@ -176,6 +215,8 @@ type Vendor {
   commissionRate: Float!
   averageRating: Float!
   reviewsCount: Int!
+  followersCount: Int!
+  totalSales: Int!
   user: User!
   orders: [OrderItem!]!
   reviews: [Review!]!
@@ -192,28 +233,20 @@ type RegisterResponse {
   msg: String!
 }
 
+type Follow {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  follower: User!
+  followerId: String!
+  vendor: Vendor!
+  vendorId: String!
+}
+
 type PaginatedProductOutput {
   items: [Product!]!
   totalItems: Int!
   totalPages: Int!
-}
-
-type Cart {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  user: User!
-  items: [CartItem!]!
-  totalAmount: Float!
-}
-
-type CartItem {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  quantity: Int!
-  product: Product!
-  productId: String!
 }
 
 type PaginatedOrderOutput {
@@ -240,16 +273,6 @@ type PaginatedUserOutput {
   totalPages: Int!
 }
 
-type Follow {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  follower: User!
-  followerId: String!
-  vendor: Vendor!
-  vendorId: String!
-}
-
 type PaginatedReviewOutput {
   items: [Review!]!
   totalItems: Int!
@@ -257,6 +280,7 @@ type PaginatedReviewOutput {
 }
 
 type Query {
+  feed(pagination: PaginationInput): PaginatedProductOutput!
   products(filter: GetProductsFilterInput): PaginatedProductOutput!
   product(id: String!): Product!
   myWallet: Wallet
@@ -274,6 +298,9 @@ type Query {
   me: User!
   myFollows: [Follow!]!
   vendorReviews(vendorId: String!, pagination: PaginationInput): PaginatedReviewOutput!
+  topSellingProducts(input: GetAnalyticsInput): [Product!]!
+  topPopularVendors(input: GetAnalyticsInput): [Vendor!]!
+  myWishlist: Wishlist!
 }
 
 input GetProductsFilterInput {
@@ -286,13 +313,18 @@ input GetProductsFilterInput {
   maxPrice: Float
 }
 
+input GetAnalyticsInput {
+  limit: Int! = 5
+  startDate: DateTime
+  endDate: DateTime
+}
+
 type Mutation {
   register(input: RegisterInput!): User!
   login(input: LoginInput!): AuthResponse!
   refreshToken: AuthResponse!
   verifyOtp(input: VerifyOtpInput!): AuthResponse!
   resendOtp(input: ResendOtpInput!): RegisterResponse!
-  sendNotification(notification: SendNotificationDto!): String!
   createProduct(createProductInput: CreateProductInput!): Product!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   removeProduct(id: String!): Boolean!
@@ -314,6 +346,8 @@ type Mutation {
   createReview(input: CreateReviewInput!): Review!
   updateReview(input: UpdateReviewInput!): Review!
   removeReview(id: String!): Boolean!
+  addToWishlist(input: AddToWishlistInput!): Wishlist!
+  removeFromWishlist(productId: String!): Wishlist!
 }
 
 input RegisterInput {
@@ -336,12 +370,6 @@ input VerifyOtpInput {
 
 input ResendOtpInput {
   email: String!
-}
-
-input SendNotificationDto {
-  deviceId: String!
-  title: String!
-  body: String!
 }
 
 input CreateProductInput {
@@ -417,4 +445,8 @@ input UpdateReviewInput {
   rating: Int
   comment: String
   id: String!
+}
+
+input AddToWishlistInput {
+  productId: String!
 }

@@ -14,6 +14,7 @@ import { GetProductsFilterInput } from './dto/products-filter.input';
 import { Vendor } from 'src/vendors/entities/vendor.entity';
 import { Category } from 'src/categories/entities/category.entity';
 import { CategoryLoader } from 'src/dataLoaders/category.loader';
+import { PaginationInput } from 'src/common/dto/pagination.input';
 
 export const paginatedProduct = genericPaginated(Product);
 @Resolver(() => Product)
@@ -31,6 +32,16 @@ export class ProductsResolver {
     @CurrentUser() user: { id: string; role: string },
   ): Promise<Product> {
     return this.productsService.create(user.id, createProductInput);
+  }
+
+  @Query(() => paginatedProduct, { name: 'feed' })
+  @UseGuards(AuthGuard) // User must be logged in
+  async userFeed(
+    @CurrentUser() user: { userId: string },
+    @Args('pagination', { nullable: true }) pagination?: PaginationInput,
+  ) {
+    const input = pagination || { page: 1, limit: 10 };
+    return this.productsService.getUserFeed(user.userId, input);
   }
 
   @Query(() => paginatedProduct)

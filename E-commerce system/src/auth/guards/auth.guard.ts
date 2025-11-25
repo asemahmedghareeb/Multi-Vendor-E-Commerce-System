@@ -14,7 +14,6 @@ export class AuthGuard implements CanActivate {
     const ctx = gqlCtx.getContext();
     const req = ctx.req;
 
-    // Support both HTTP and GraphQL
     const headers = req?.headers || {};
     const auth = headers.authorization || headers.Authorization;
     if (!auth) throw new UnauthorizedException('You are unauthorized');

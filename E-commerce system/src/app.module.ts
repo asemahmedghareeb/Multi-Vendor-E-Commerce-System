@@ -6,7 +6,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
-import { PushNotificationsModule } from './notifications/push-notifications.module';
 import { EmailsModule } from './emails/emails.module';
 import { BullModule } from '@nestjs/bull';
 import { DataLoadersModule } from './dataLoaders/dataLoaders.module';
@@ -18,8 +17,6 @@ import {
   getDataSourceByName,
 } from 'typeorm-transactional';
 import { DataSource } from 'typeorm';
-import { PubSubModule } from './pubsub/pubsub.module';
-import { FcmModule } from './fcm/fcm.module';
 import { ProductsModule } from './products/products.module';
 import { PaymentsModule } from './payments/payments.module';
 import { OrdersModule } from './orders/orders.module';
@@ -54,6 +51,11 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { Follow } from './follow/entities/follow.entity';
 import { Review } from './reviews/entities/review.entity';
 import { Refund } from './payments/entities/refund.entity';
+import { NotificationsModule } from './notifications/Notifications.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { WishlistModule } from './wishlist/wishlist.module';
+import { Wishlist } from './wishlist/entities/wishlist.entity';
+import { WishlistItem } from './wishlist/entities/wishlist-item.entity';
 @Module({
   imports: [
     I18nModule.forRoot({
@@ -112,7 +114,8 @@ import { Refund } from './payments/entities/refund.entity';
             Follow,
             Review,
             Refund,
-            // PushDevice,
+            Wishlist,
+            WishlistItem,
           ],
         };
       },
@@ -164,30 +167,28 @@ import { Refund } from './payments/entities/refund.entity';
           statusCode = originalError.status || 400;
           errorType = response.error || 'Error';
 
-          // If response is a string (from our I18nExceptionFilter)
           if (typeof response === 'string') {
             message = response;
           }
-          // If response is an object (Standard Validation)
+
           else if (typeof response === 'object') {
-            // If it's an array of messages
+
             if (Array.isArray(response.message)) {
               message = response.message[0];
               allMessages = response.message;
             }
-            // Fallback for object style
+
             else if (response.message) {
               message = response.message;
             }
           }
         }
-        // 4. Handle Raw Class-Validator / I18n Pipe Errors (if filter is bypassed)
         else if (originalError.errors) {
           statusCode = 400;
           errorType = 'Bad Request';
           const rawErrors = originalError.errors;
 
-          // Map to clean strings
+        
           const cleanMessages = rawErrors.map((err: any) =>
             typeof err === 'string'
               ? err
@@ -198,7 +199,7 @@ import { Refund } from './payments/entities/refund.entity';
           allMessages = cleanMessages;
         }
 
-        // 5. Return Unified Error Structure
+
         return {
           message,
           allMessages,
@@ -215,7 +216,7 @@ import { Refund } from './payments/entities/refund.entity';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '7d' }, // change in production
+        signOptions: { expiresIn: '7d' }, //change it in production
       }),
       inject: [ConfigService],
     }),
@@ -223,9 +224,8 @@ import { Refund } from './payments/entities/refund.entity';
     EmailsModule,
     DataLoadersModule,
     CommonModule,
-    PubSubModule,
-    PushNotificationsModule,
-    FcmModule,
+
+    NotificationsModule,
     ProductsModule,
     PaymentsModule,
     OrdersModule,
@@ -236,6 +236,8 @@ import { Refund } from './payments/entities/refund.entity';
     WalletModule,
     FollowModule,
     ReviewsModule,
+    AnalyticsModule,
+    WishlistModule,
   ],
 })
 export class AppModule {}

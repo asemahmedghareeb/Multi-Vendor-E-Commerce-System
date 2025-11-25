@@ -8,6 +8,7 @@ import { Payment, PaymentStatus } from './entities/payment.entity';
 import { Order } from '../orders/entities/order.entity';
 import { WalletsService } from 'src/wallet/wallet.service';
 import { EmailsService } from 'src/emails/emails.service';
+import { NotificationsService } from 'src/notifications/notification.service';
 
 @Injectable()
 export class PaymentsService {
@@ -19,6 +20,7 @@ export class PaymentsService {
     private configService: ConfigService,
     private readonly walletsService: WalletsService,
     private readonly emailService: EmailsService,
+    private readonly notificationsService: NotificationsService,
   ) {
     const apiKey = this.configService.get<string>('STRIPE_SECRET_KEY');
 
@@ -62,7 +64,7 @@ export class PaymentsService {
   async handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     const payment = await this.paymentRepo.findOne({
       where: { stripePaymentId: paymentIntent.id },
-      relations: ['order'],
+      relations: ['order','order.user'],
     });
 
     if (!payment) return;
@@ -77,7 +79,7 @@ export class PaymentsService {
       order.status = OrderStatus.PROCESSING;
       await this.orderRepo.save(order);
     }
-
+    
     const fullOrder = await this.orderRepo.findOne({
       where: { id: order.id },
       relations: ['items'],
@@ -85,6 +87,16 @@ export class PaymentsService {
 
     if (fullOrder) {
       await this.walletsService.processOrderRevenue(fullOrder);
+    }
+
+
+
+    if (order.user) {
+      await this.notificationsService.sendOrderConfirmation(
+        order.user.email, 
+        order.id, 
+        order.totalAmount
+      );
     }
   }
 
@@ -134,6 +146,7 @@ export class PaymentsService {
     await this.paymentRepo.save(payment);
 
     if (payment.order?.user) {
+      
       await this.emailService.sendEmail(
         payment.order.user.email,
         'Payment Failed',

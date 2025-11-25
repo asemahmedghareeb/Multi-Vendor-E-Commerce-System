@@ -23,7 +23,7 @@ export class CartResolver {
 
   @Query(() => Cart, { name: 'myCart' })
   @UseGuards(AuthGuard)
-  async myCart(@CurrentUser() user: { role: string; userId: string }) {
+  async myCart(@CurrentUser() user: { userId: string }) {
     return this.cartService.getCart(user.userId);
   }
 
@@ -31,7 +31,7 @@ export class CartResolver {
   @UseGuards(AuthGuard)
   async addToCart(
     @Args('input') input: AddToCartInput,
-    @CurrentUser() user: { role: string; userId: string },
+    @CurrentUser() user: { userId: string },
   ) {
     return this.cartService.addToCart(user.userId, input);
   }
@@ -40,7 +40,7 @@ export class CartResolver {
   @UseGuards(AuthGuard)
   async updateCartItem(
     @Args('input') input: UpdateCartItemInput,
-    @CurrentUser() user: { role: string; userId: string },
+    @CurrentUser() user: { userId: string },
   ) {
     return this.cartService.updateCartItem(user.userId, input);
   }
@@ -49,7 +49,7 @@ export class CartResolver {
   @UseGuards(AuthGuard)
   async removeFromCart(
     @Args('cartItemId') cartItemId: string,
-    @CurrentUser() user: { role: string; userId: string },
+    @CurrentUser() user: { userId: string },
   ) {
     return this.cartService.removeFromCart(user.userId, cartItemId);
   }
