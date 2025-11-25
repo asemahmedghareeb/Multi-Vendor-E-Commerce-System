@@ -21,10 +21,10 @@
     "up:dev": "docker-compose -f docker-compose.yml  -f  docker-compose.dev.yml up -d",
     "up:prod": "docker-compose -f docker-compose.yml  -f  docker-compose.prod.yml up -d",
     "docker:logs": "docker logs E-commerce-container -f",
-   "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
- "migration:generate": "npm run typeorm -- -d src/typeorm-datasource.ts migration:generate",
-  "migration:run": "npm run typeorm -- -d src/typeorm-datasource.ts migration:run",
-  "migration:revert": "npm run typeorm -- -d src/typeorm-datasource.ts migration:revert"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "migration:generate": "npm run typeorm -- -d src/typeorm-datasource.ts migration:generate",
+    "migration:run": "npm run typeorm -- -d src/typeorm-datasource.ts migration:run",
+    "migration:revert": "npm run typeorm -- -d src/typeorm-datasource.ts migration:revert"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",

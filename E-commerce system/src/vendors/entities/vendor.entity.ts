@@ -30,6 +30,7 @@ export class Vendor extends BaseEntity {
   @Column({ type: 'text' })
   bio: string;
 
+
   @Field()
   @Column({ type: 'enum', enum: VendorStatus, default: VendorStatus.PENDING })
   status: VendorStatus;

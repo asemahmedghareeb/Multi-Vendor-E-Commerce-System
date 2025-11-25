@@ -9,7 +9,6 @@ import {
   Query,
 } from '@nestjs/graphql';
 import { VendorService } from './vendors.service';
-import { Role } from 'src/auth/guards/role.enum';
 import { UseGuards } from '@nestjs/common';
 import { Vendor, VendorStatus } from './entities/vendor.entity';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -19,12 +18,12 @@ import { UserLoader } from 'src/dataLoaders/user.loader';
 import { User } from 'src/users/entities/user.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { ReviewsLoader } from 'src/dataLoaders/reviews.loader';
-import { Product } from 'src/products/entities/product.entity';
 import { ProductLoader } from 'src/dataLoaders/products.loader';
 import { OrderItem } from 'src/orders/entities/order-item.entity';
 import { genericPaginated } from 'src/common/dto/paginated-output';
 import { PaginationInput } from 'src/common/dto/pagination.input';
 import { paginatedProduct } from 'src/products/products.resolver';
+import { Role } from 'src/auth/guards/role.enum';
 const paginatedVendors = genericPaginated(Vendor);
 
 @Resolver(() => Vendor)
@@ -71,11 +70,6 @@ export class UsersResolver {
     return this.reviewsLoader.load.load(vendor.id);
   }
 
-  // @ResolveField(() => [Product])
-  // async products(@Parent() vendor: Vendor) {
-  //   if (vendor.products) return vendor.products;
-  //   return this.productLoader.byVendorId.load(vendor.id);
-  // }
 
   @ResolveField(() => paginatedProduct)
   async products(

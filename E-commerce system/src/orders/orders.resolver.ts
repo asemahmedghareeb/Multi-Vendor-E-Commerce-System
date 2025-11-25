@@ -22,13 +22,13 @@ import { OrderItem } from './entities/order-item.entity';
 import { OrderStatus } from './enum/order-status.enum';
 import { genericPaginated } from 'src/common/dto/paginated-output';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Role } from 'src/auth/guards/role.enum';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { PaginationInput } from 'src/common/dto/pagination.input';
 import { ProductLoader } from 'src/dataLoaders/products.loader';
 import { VendorLoader } from 'src/dataLoaders/vendor.loader';
 import { Product } from 'src/products/entities/product.entity';
 import { Vendor } from 'src/vendors/entities/vendor.entity';
+import { Role } from 'src/auth/guards/role.enum';
 
 const paginatedOrders = genericPaginated(Order);
 @Resolver(() => Order)
