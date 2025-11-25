@@ -21,8 +21,6 @@ export class UsersService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Device)
     private readonly deviceRepo: Repository<Device>,
-
-    private readonly i18n: I18nService,
   ) {}
 
   async findAll(pagination: PaginationInput): Promise<IPaginatedType<User>> {
@@ -49,7 +47,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException(this.i18n.t('events.auth.USER_NOT_FOUND'));
+      throw new NotFoundException('events.auth.USER_NOT_FOUND');
     }
     return user;
   }
@@ -62,7 +60,7 @@ export class UsersService {
         where: { email: input.email },
       });
       if (existing && existing.id !== id) {
-        throw new BadRequestException(this.i18n.t('events.auth.EMAIL_EXISTS'));
+        throw new BadRequestException('events.auth.EMAIL_EXISTS');
       }
       user.email = input.email;
     }
@@ -77,7 +75,7 @@ export class UsersService {
   async remove(id: string): Promise<boolean> {
     const user = await this.findOne(id);
     if (!user) {
-      throw new NotFoundException(this.i18n.t('events.auth.USER_NOT_FOUND'));
+      throw new NotFoundException('events.auth.USER_NOT_FOUND');
     }
 
     await this.userRepo.remove(user);
@@ -95,7 +93,7 @@ export class UsersService {
 
     const user = await this.findOne(userId);
     if (!user) {
-      throw new NotFoundException(this.i18n.t('events.auth.USER_NOT_FOUND'));
+      throw new NotFoundException('events.auth.USER_NOT_FOUND');
     }
 
     if (device) {

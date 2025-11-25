@@ -35,7 +35,7 @@ export class ProductsResolver {
   }
 
   @Query(() => paginatedProduct, { name: 'feed' })
-  @UseGuards(AuthGuard) // User must be logged in
+  @UseGuards(AuthGuard)
   async userFeed(
     @CurrentUser() user: { userId: string },
     @Args('pagination', { nullable: true }) pagination?: PaginationInput,
@@ -43,11 +43,11 @@ export class ProductsResolver {
     const input = pagination || { page: 1, limit: 10 };
     return this.productsService.getUserFeed(user.userId, input);
   }
-
+ 
   @Query(() => paginatedProduct)
   async products(
     @Args('filter', { nullable: true }) filter?: GetProductsFilterInput,
-  ) {
+  ) { 
     const input = filter || { page: 1, limit: 10 };
     return this.productsService.findAll(input);
   }

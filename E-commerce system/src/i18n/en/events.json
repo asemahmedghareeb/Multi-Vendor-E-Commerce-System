@@ -1,0 +1,100 @@
+{
+  "common": {
+    "SUCCESS": "Operation completed successfully",
+    "ERROR": "An error occurred",
+    "NOT_FOUND": "Resource not found",
+    "UNAUTHORIZED": "You are not authorized to perform this action",
+    "FORBIDDEN": "Access denied",
+    "VALIDATION_ERROR": "Validation failed"
+  },
+  "auth": {
+    "LOGIN_SUCCESS": "Logged in successfully",
+    "INVALID_CREDENTIALS": "Invalid email or password",
+    "EMAIL_EXISTS": "Email is already in use",
+    "USER_NOT_FOUND": "User not found",
+    "EMAIL_NOT_FOUND": "Email not found",
+    "REGISTER_SUCCESS_CLIENT": "Client account created successfully",
+    "REGISTER_SUCCESS_VENDOR": "Vendor account created. Please wait for admin approval.",
+    "ACCOUNT_PENDING": "Your account is still pending approval",
+    "ACCOUNT_REJECTED": "Your account has been rejected. Please contact support.",
+    "ACCOUNT_ALREADY_VERIFIED": "Your account is already verified",
+    "ACCOUNT_NOT_VERIFIED": "Account not verified. Please check your email for an OTP.",
+    "EXPIRED_OTP": "OTP has expired.",
+    "INVALID_OTP": "Invalid OTP",
+    "INVALID_GOOGLE_CODE": "Invalid Google Code"
+  },
+  "vendor": {
+    "NOT_FOUND": "Vendor not found",
+    "NOT_OWNER": "You do not own this resource",
+    "ONLY_VERIFIED": "Only verified vendors can perform this action",
+    "APPROVED": "Vendor {name} has been approved",
+    "REJECTED": "Vendor {name} has been rejected",
+    "MUST_SUPPLY_BUSINESS_NAME": "You must supply a business name"
+  },
+  "product": {
+    "NOT_FOUND": "Product not found",
+    "INSUFFICIENT_INVENTORY": "Only {count} items left in stock",
+    "CREATED": "Product created successfully",
+    "UPDATED": "Product updated successfully",
+    "DELETED": "Product deleted successfully",
+    "NOT_OWNER": "You do not own this resource"
+  },
+  "cart": {
+    "EMPTY": "Cart is empty",
+    "ITEM_NOT_FOUND": "Item not found in cart",
+    "ITEM_ADDED": "Item added to cart",
+    "ITEM_REMOVED": "Item removed from cart",
+    "UPDATED": "Cart updated successfully"
+  },
+  "order": {
+    "NOT_FOUND": "Order not found",
+    "ITEM_NOT_FOUND": "Order item not found",
+    "PLACED": "Order placed successfully",
+    "STATUS_UPDATED": "Order status updated to {status}",
+    "CANCELLED": "Order cancelled successfully"
+  },
+  "payment": {
+    "NOT_FOUND": "Payment record not found",
+    "SUCCESS": "Payment successful",
+    "FAILED": "Payment failed: {reason}",
+    "REFUND_PROCESSED": "Refund of {amount} processed successfully",
+    "REFUND_FAILED": "Refund failed: {reason}",
+    "ALREADY_REFUNDED": "Payment is already fully refunded"
+  },
+  "wallet": {
+    "INSUFFICIENT_FUNDS": "Insufficient funds in wallet",
+    "DEPOSIT": "Wallet credited with {amount}",
+    "WITHDRAWAL": "Payout of {amount} initiated"
+  },
+  "review": {
+    "ALREADY_REVIEWED": "You have already reviewed this order",
+    "MUST_BUY_FIRST": "You can only review vendors after purchasing their products",
+    "ADDED": "Review submitted successfully"
+  },
+  "follow": {
+    "FOLLOWED": "You are now following {vendor}",
+    "UNFOLLOWED": "You have unfollowed {vendor}"
+  },
+  "category": {
+    "NOT_FOUND": "Category not found",
+    "PARENT_NOT_FOUND": "Parent Category not found",
+    "ALREADY_EXISTS": "Category already exists",
+    "CANNOT_DELETE": "Cannot delete category as it has child categories"
+  },
+  "wishlist": {
+    "PRODUCT_ALREADY_EXISTS": "Product already in wishlist",
+    "ITEM_NOT_FOUND": "Item not found in wishlist",
+    "NOT_FOUND": "Wishlist not found"
+  },
+  "validation": {
+    "NOT_EMPTY": "Field {property} cannot be empty",
+    "IS_STRING": "Field {property} must be a string",
+    "IS_INT": "Field {property} must be an integer",
+    "IS_NUMBER": "Field {property} must be a number",
+    "IS_UUID": "Field {property} must be a valid UUID",
+    "IS_EMAIL": "Field {property} must be a valid email address",
+    "IS_ARRAY": "Field {property} must be an array",
+    "MIN": "Field {property} must be at least {constraint1}",
+    "MAX": "Field {property} must not exceed {constraint1}"
+  }
+}

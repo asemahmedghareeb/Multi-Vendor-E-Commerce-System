@@ -11,6 +11,7 @@ export class I18nExceptionFilter implements GqlExceptionFilter {
     const ctx = gqlHost.getContext();
 
     const lang = ctx.req?.i18nLang || 'en';
+
     const response = exception.getResponse();
     const status = exception.getStatus();
 

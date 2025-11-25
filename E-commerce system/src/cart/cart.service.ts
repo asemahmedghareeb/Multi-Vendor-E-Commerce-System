@@ -20,8 +20,6 @@ export class CartService {
     @InjectRepository(CartItem) private cartItemRepo: Repository<CartItem>,
     @InjectRepository(Product) private productRepo: Repository<Product>,
     @InjectRepository(User) private userRepo: Repository<User>,
-
-    private readonly i18n: I18nService,
   ) {}
 
   async getCart(userId: string): Promise<Cart> {
@@ -35,7 +33,7 @@ export class CartService {
       const user = await this.userRepo.findOne({ where: { id: userId } });
 
       if (!user) {
-        throw new NotFoundException(this.i18n.t('events.product.NOT_FOUND'));
+        throw new NotFoundException('events.product.NOT_FOUND');
       }
 
       cart = this.cartRepo.create({ user: user, items: [] });
@@ -135,12 +133,12 @@ export class CartService {
     });
 
     if (!cartItem) {
-      throw new NotFoundException(this.i18n.t('events.cart.ITEM_NOT_FOUND'));
+      throw new NotFoundException(('events.cart.ITEM_NOT_FOUND'));
     }
 
     if (cartItem.product.inventoryCount < input.quantity) {
       throw new BadRequestException({
-        key: this.i18n.t('events.product.INSUFFICIENT_INVENTORY'),
+        key:('events.product.INSUFFICIENT_INVENTORY'),
         args: { count: cartItem.product.inventoryCount },
       });
     }
@@ -159,7 +157,7 @@ export class CartService {
     });
 
     if (result.affected === 0)
-      throw new NotFoundException(this.i18n.t('events.cart.ITEM_NOT_FOUND'));
+      throw new NotFoundException('events.cart.ITEM_NOT_FOUND');
 
     return this.getCart(userId);
   }
