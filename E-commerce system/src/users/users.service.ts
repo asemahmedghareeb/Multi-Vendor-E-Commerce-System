@@ -11,12 +11,17 @@ import { IPaginatedType } from 'src/common/dto/paginated-output';
 import { PaginationInput } from 'src/common/dto/pagination.input';
 import { UpdateUserInput } from './dto/updated-user.dto';
 import { I18nService } from 'nestjs-i18n';
+import { RegisterDeviceInput } from './dto/register-device.input';
+import { Device } from './entities/device.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(Device)
+    private readonly deviceRepo: Repository<Device>,
+
     private readonly i18n: I18nService,
   ) {}
 
@@ -76,6 +81,47 @@ export class UsersService {
     }
 
     await this.userRepo.remove(user);
+    return true;
+  }
+
+  async registerDevice(
+    userId: string,
+    input: RegisterDeviceInput,
+  ): Promise<boolean> {
+    let device = await this.deviceRepo.findOne({
+      where: { fcmToken: input.fcmToken },
+      relations: ['user'],
+    });
+
+    const user = await this.findOne(userId);
+    if (!user) {
+      throw new NotFoundException(this.i18n.t('events.auth.USER_NOT_FOUND'));
+    }
+
+    if (device) {
+      if (device.user?.id !== user.id) {
+        device.user = user;
+      }
+
+      device.lastActiveAt = new Date();
+      if (input.platform) device.platform = input.platform;
+
+      await this.deviceRepo.save(device);
+    } else {
+      device = this.deviceRepo.create({
+        fcmToken: input.fcmToken,
+        platform: input.platform,
+        user: user,
+        lastActiveAt: new Date(),
+      });
+      await this.deviceRepo.save(device);
+    }
+
+    return true;
+  }
+
+  async removeDevice(token: string): Promise<boolean> {
+    await this.deviceRepo.delete({ fcmToken: token });
     return true;
   }
 }

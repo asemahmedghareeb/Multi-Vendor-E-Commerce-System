@@ -56,6 +56,8 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { Wishlist } from './wishlist/entities/wishlist.entity';
 import { WishlistItem } from './wishlist/entities/wishlist-item.entity';
+import { FcmModule } from './fcm/fcm.module';
+import { Device } from './users/entities/device.entity';
 @Module({
   imports: [
     I18nModule.forRoot({
@@ -116,6 +118,7 @@ import { WishlistItem } from './wishlist/entities/wishlist-item.entity';
             Refund,
             Wishlist,
             WishlistItem,
+            Device
           ],
         };
       },
@@ -169,26 +172,19 @@ import { WishlistItem } from './wishlist/entities/wishlist-item.entity';
 
           if (typeof response === 'string') {
             message = response;
-          }
-
-          else if (typeof response === 'object') {
-
+          } else if (typeof response === 'object') {
             if (Array.isArray(response.message)) {
               message = response.message[0];
               allMessages = response.message;
-            }
-
-            else if (response.message) {
+            } else if (response.message) {
               message = response.message;
             }
           }
-        }
-        else if (originalError.errors) {
+        } else if (originalError.errors) {
           statusCode = 400;
           errorType = 'Bad Request';
           const rawErrors = originalError.errors;
 
-        
           const cleanMessages = rawErrors.map((err: any) =>
             typeof err === 'string'
               ? err
@@ -198,7 +194,6 @@ import { WishlistItem } from './wishlist/entities/wishlist-item.entity';
           message = cleanMessages[0];
           allMessages = cleanMessages;
         }
-
 
         return {
           message,
@@ -224,7 +219,6 @@ import { WishlistItem } from './wishlist/entities/wishlist-item.entity';
     EmailsModule,
     DataLoadersModule,
     CommonModule,
-
     NotificationsModule,
     ProductsModule,
     PaymentsModule,
@@ -238,6 +232,7 @@ import { WishlistItem } from './wishlist/entities/wishlist-item.entity';
     ReviewsModule,
     AnalyticsModule,
     WishlistModule,
+    FcmModule,
   ],
 })
 export class AppModule {}

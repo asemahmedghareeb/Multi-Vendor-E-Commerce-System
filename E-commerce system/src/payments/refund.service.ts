@@ -1,10 +1,9 @@
 import {
   Injectable,
   BadRequestException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { Refund } from './entities/refund.entity';
