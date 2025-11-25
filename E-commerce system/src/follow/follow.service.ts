@@ -37,14 +37,21 @@ export class FollowsService {
     });
 
     await this.followRepo.save(follow);
+
+    await this.vendorRepo.increment({ id: vendorId }, 'followersCount', 1);
+
     return true;
   }
-
   async unfollow(userId: string, vendorId: string): Promise<boolean> {
-    await this.followRepo.delete({
+    const result = await this.followRepo.delete({
       follower: { id: userId },
       vendor: { id: vendorId },
     });
+
+    if (result.affected && result.affected > 0) {
+      await this.vendorRepo.decrement({ id: vendorId }, 'followersCount', 1);
+    }
+
     return true;
   }
 

@@ -176,6 +176,8 @@ type Vendor {
   commissionRate: Float!
   averageRating: Float!
   reviewsCount: Int!
+  followersCount: Int!
+  totalSales: Int!
   user: User!
   orders: [OrderItem!]!
   reviews: [Review!]!
@@ -190,6 +192,16 @@ type AuthResponse {
 
 type RegisterResponse {
   msg: String!
+}
+
+type Follow {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  follower: User!
+  followerId: String!
+  vendor: Vendor!
+  vendorId: String!
 }
 
 type PaginatedProductOutput {
@@ -240,16 +252,6 @@ type PaginatedUserOutput {
   totalPages: Int!
 }
 
-type Follow {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  follower: User!
-  followerId: String!
-  vendor: Vendor!
-  vendorId: String!
-}
-
 type PaginatedReviewOutput {
   items: [Review!]!
   totalItems: Int!
@@ -257,6 +259,7 @@ type PaginatedReviewOutput {
 }
 
 type Query {
+  feed(pagination: PaginationInput): PaginatedProductOutput!
   products(filter: GetProductsFilterInput): PaginatedProductOutput!
   product(id: String!): Product!
   myWallet: Wallet
@@ -274,6 +277,8 @@ type Query {
   me: User!
   myFollows: [Follow!]!
   vendorReviews(vendorId: String!, pagination: PaginationInput): PaginatedReviewOutput!
+  topSellingProducts(input: GetAnalyticsInput): [Product!]!
+  topPopularVendors(input: GetAnalyticsInput): [Vendor!]!
 }
 
 input GetProductsFilterInput {
@@ -284,6 +289,12 @@ input GetProductsFilterInput {
   categoryName: String
   minPrice: Float
   maxPrice: Float
+}
+
+input GetAnalyticsInput {
+  limit: Int! = 5
+  startDate: DateTime
+  endDate: DateTime
 }
 
 type Mutation {

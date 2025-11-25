@@ -12,7 +12,6 @@ import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Product } from 'src/products/entities/product.entity';
 import { OrderItem } from 'src/orders/entities/order-item.entity';
-import { Wallet } from 'src/wallet/entities/wallet.entity';
 
 export enum VendorStatus {
   PENDING = 'PENDING',
@@ -47,11 +46,18 @@ export class Vendor extends BaseEntity {
   @Column({ type: 'int', default: 0 })
   reviewsCount: number;
 
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  followersCount: number;
+
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  totalSales: number;
+
   @Field(() => User)
   @OneToOne(() => User, (user) => user.vendorProfile)
   @JoinColumn({ name: 'userId' })
   user: User;
-
 
   @RelationId((vendor: Vendor) => vendor.user)
   userId: string;

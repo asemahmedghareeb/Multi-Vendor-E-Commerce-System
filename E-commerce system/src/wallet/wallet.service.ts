@@ -11,6 +11,7 @@ import { Transactional } from 'typeorm-transactional';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRole } from 'src/common/enums/roles.enum';
 import { OrderItem } from 'src/orders/entities/order-item.entity';
+import { Vendor } from 'src/vendors/entities/vendor.entity';
 
 @Injectable()
 export class WalletsService {
@@ -19,9 +20,12 @@ export class WalletsService {
     private readonly walletRepo: Repository<Wallet>,
     @InjectRepository(WalletTransaction)
     private readonly txRepo: Repository<WalletTransaction>,
-    @InjectRepository(User) private readonly userRepo: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
     @InjectRepository(OrderItem)
     private readonly orderItemRepo: Repository<OrderItem>,
+    @InjectRepository(Vendor)
+    private readonly vendorRepo: Repository<Vendor>,
   ) {}
 
   @Transactional()
@@ -92,6 +96,12 @@ export class WalletsService {
         });
         await this.txRepo.save(adminTx);
       }
+
+      await this.vendorRepo.increment(
+        { id: item.vendorId },
+        'totalSales',
+        item.quantity,
+      );
     }
   }
 

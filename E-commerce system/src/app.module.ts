@@ -6,7 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
-import { PushNotificationsModule } from './notifications/push-notifications.module';
+
 import { EmailsModule } from './emails/emails.module';
 import { BullModule } from '@nestjs/bull';
 import { DataLoadersModule } from './dataLoaders/dataLoaders.module';
@@ -54,6 +54,8 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { Follow } from './follow/entities/follow.entity';
 import { Review } from './reviews/entities/review.entity';
 import { Refund } from './payments/entities/refund.entity';
+import { NotificationsModule } from './notifications/Notifications.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 @Module({
   imports: [
     I18nModule.forRoot({
@@ -224,7 +226,7 @@ import { Refund } from './payments/entities/refund.entity';
     DataLoadersModule,
     CommonModule,
     PubSubModule,
-    PushNotificationsModule,
+    NotificationsModule,
     FcmModule,
     ProductsModule,
     PaymentsModule,
@@ -236,6 +238,7 @@ import { Refund } from './payments/entities/refund.entity';
     WalletModule,
     FollowModule,
     ReviewsModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

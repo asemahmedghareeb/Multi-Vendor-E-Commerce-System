@@ -17,6 +17,7 @@ import { Role } from 'src/auth/guards/role.enum';
 import { GetProductsFilterInput } from './dto/products-filter.input';
 import { I18nService } from 'nestjs-i18n';
 import { PaginationInput } from 'src/common/dto/pagination.input';
+import { Follow } from 'src/follow/entities/follow.entity';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -58,6 +59,34 @@ export class ProductsService {
     return product;
   }
 
+  async getUserFeed(
+    userId: string,
+    pagination: PaginationInput,
+  ): Promise<IPaginatedType<Product>> {
+    const { page, limit } = pagination;
+    const skip = (page - 1) * limit;
+
+    const qb = this.productRepo.createQueryBuilder('product');
+
+
+    qb.innerJoin(Follow, 'follow', 'follow.vendor.id = product.vendor.id');
+
+    qb.where('follow.follower_id = :userId', { userId });
+
+    qb.leftJoinAndSelect('product.vendor', 'vendor');
+
+    qb.orderBy('product.createdAt', 'DESC');
+    qb.skip(skip).take(limit);
+
+    const [items, totalItems] = await qb.getManyAndCount();
+
+    return {
+      items,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+    };
+  }
+
   async findAll(
     input: GetProductsFilterInput,
   ): Promise<IPaginatedType<Product>> {
@@ -66,7 +95,7 @@ export class ProductsService {
       limit,
       search,
       categoryId,
-      categoryName, // <--- This requires special handling
+      categoryName,
       minPrice,
       maxPrice,
     } = input;
@@ -208,8 +237,6 @@ export class ProductsService {
     };
   }
 
-
-  
   async findAllByCategory(
     categoryId: string,
     pagination: PaginationInput,

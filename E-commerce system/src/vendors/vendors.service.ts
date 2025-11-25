@@ -1,21 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { Vendor } from './entities/vendor.entity';
 import { VendorStatus } from './entities/vendor.entity';
-import { EmailsService } from 'src/emails/emails.service';
 import { I18nService } from 'nestjs-i18n';
 import { IPaginatedType } from 'src/common/dto/paginated-output';
 import { PaginationInput } from 'src/common/dto/pagination.input';
+import { NotificationsService } from 'src/notifications/notification.service';
 
 @Injectable()
 export class VendorService {
   constructor(
     @InjectRepository(Vendor)
     private readonly vendorRepo: Repository<Vendor>,
-    private readonly emailService: EmailsService,
     private readonly i18n: I18nService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async findAll(pagination: PaginationInput): Promise<IPaginatedType<Vendor>> {
@@ -48,12 +47,15 @@ export class VendorService {
       throw new NotFoundException(this.i18n.t('events.vendor.NOT_FOUND'));
 
     vendor.status = status;
-    await this.emailService.sendEmail(
-      vendor.user.email,
-      'Vendor Status Updated',
-      'Your vendor status has been updated to ' + status,
-    );
 
+    if (status === VendorStatus.VERIFIED) {
+      await this.notificationsService.sendVendorApproval(
+        vendor.user.email,
+        vendor.businessName,
+      );
+    }
+    
+    
     return this.vendorRepo.save(vendor);
   }
 

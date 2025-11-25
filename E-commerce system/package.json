@@ -1,5 +1,5 @@
 {
-  "name": "airport_system",
+  "name": "MultiVendors E-commerce system",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -20,7 +20,11 @@
     "docker:build": "docker-compose  -f  docker-compose.yml  -f docker-compose.dev.yml  up -d --build",
     "up:dev": "docker-compose -f docker-compose.yml  -f  docker-compose.dev.yml up -d",
     "up:prod": "docker-compose -f docker-compose.yml  -f  docker-compose.prod.yml up -d",
-    "docker:logs": "docker logs E-commerce-container -f"
+    "docker:logs": "docker logs E-commerce-container -f",
+   "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+ "migration:generate": "npm run typeorm -- -d src/typeorm-datasource.ts migration:generate",
+  "migration:run": "npm run typeorm -- -d src/typeorm-datasource.ts migration:run",
+  "migration:revert": "npm run typeorm -- -d src/typeorm-datasource.ts migration:revert"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
@@ -44,6 +48,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "dataloader": "^2.2.3",
+    "dotenv": "^17.2.3",
     "express-rate-limit": "^8.1.0",
     "firebase": "^12.6.0",
     "firebase-admin": "^13.6.0",
@@ -60,6 +65,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "stripe": "^20.0.0",
+    "tsconfig-paths": "^4.2.0",
     "typeorm": "^0.3.27",
     "typeorm-transactional": "^0.5.0"
   },
