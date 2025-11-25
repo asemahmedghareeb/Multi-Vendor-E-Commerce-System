@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Vendor } from './entities/vendor.entity';
 import { VendorStatus } from './entities/vendor.entity';
-import { I18nService } from 'nestjs-i18n';
+
 import { IPaginatedType } from 'src/common/dto/paginated-output';
 import { PaginationInput } from 'src/common/dto/pagination.input';
 import { NotificationsService } from 'src/notifications/notification.service';
@@ -13,7 +13,6 @@ export class VendorService {
   constructor(
     @InjectRepository(Vendor)
     private readonly vendorRepo: Repository<Vendor>,
-    private readonly i18n: I18nService,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -44,7 +43,7 @@ export class VendorService {
       relations: ['user'],
     });
     if (!vendor)
-      throw new NotFoundException(this.i18n.t('events.vendor.NOT_FOUND'));
+      throw new NotFoundException('events.vendor.NOT_FOUND');
 
     vendor.status = status;
 

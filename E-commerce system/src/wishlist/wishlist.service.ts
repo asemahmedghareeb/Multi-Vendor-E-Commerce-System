@@ -64,7 +64,7 @@ export class WishlistService {
 
     const exists = wishlist.items.find((item) => item.productId === productId);
     if (exists) {
-      throw new BadRequestException('Product already in wishlist');
+      throw new BadRequestException('events.wishlist.PRODUCT_ALREADY_EXISTS');
     }
 
     const product = await this.productRepo.findOne({

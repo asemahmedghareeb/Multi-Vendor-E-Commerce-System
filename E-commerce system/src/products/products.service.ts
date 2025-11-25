@@ -13,7 +13,7 @@ import { Category } from '../categories/entities/category.entity';
 import { IPaginatedType } from 'src/common/dto/paginated-output';
 import { UpdateProductInput } from './dto/update-product.input';
 import { GetProductsFilterInput } from './dto/products-filter.input';
-import { I18nService } from 'nestjs-i18n';
+
 import { PaginationInput } from 'src/common/dto/pagination.input';
 import { Follow } from 'src/follow/entities/follow.entity';
 import { Role } from 'src/auth/guards/role.enum';
@@ -26,7 +26,6 @@ export class ProductsService {
     private readonly vendorRepo: Repository<Vendor>,
     @InjectRepository(Category)
     private readonly categoryRepo: Repository<Category>,
-    private readonly i18n: I18nService,
   ) {}
 
   async create(userId: string, input: CreateProductInput): Promise<Product> {
@@ -35,14 +34,14 @@ export class ProductsService {
     });
 
     if (!vendor) {
-      throw new ForbiddenException(this.i18n.t('events.vendor.NOT_FOUND'));
+      throw new ForbiddenException('events.vendor.NOT_FOUND');
     }
 
     const category = await this.categoryRepo.findOne({
       where: { id: input.categoryId!.toString() },
     });
     if (!category) {
-      throw new NotFoundException(this.i18n.t('events.category.NOT_FOUND'));
+      throw new NotFoundException('events.category.NOT_FOUND');
     }
 
     const product = this.productRepo.create({
@@ -66,7 +65,6 @@ export class ProductsService {
     const skip = (page - 1) * limit;
 
     const qb = this.productRepo.createQueryBuilder('product');
-
 
     qb.innerJoin(Follow, 'follow', 'follow.vendor.id = product.vendor.id');
 
@@ -150,7 +148,7 @@ export class ProductsService {
     });
 
     if (!product) {
-      const message = this.i18n.t('events.product.NOT_FOUND');
+      const message = 'events.product.NOT_FOUND';
       throw new NotFoundException(message);
     }
     return product;
@@ -162,8 +160,7 @@ export class ProductsService {
     input: UpdateProductInput,
   ): Promise<Product> {
     const product: Product | null = await this.findOne(input.id);
-    if (!product)
-      throw new NotFoundException(this.i18n.t('events.product.NOT_FOUND'));
+    if (!product) throw new NotFoundException('events.product.NOT_FOUND');
 
     await this.checkOwnership(product, userId, userRole);
 
@@ -171,8 +168,7 @@ export class ProductsService {
       const category = await this.categoryRepo.findOne({
         where: { id: input.categoryId },
       });
-      if (!category)
-        throw new NotFoundException(this.i18n.t('events.category.NOT_FOUND'));
+      if (!category) throw new NotFoundException('events.category.NOT_FOUND');
       product.category = category;
     }
 
@@ -192,8 +188,7 @@ export class ProductsService {
   async remove(userId: string, userRole: string, id: string): Promise<boolean> {
     const product: Product | null = await this.findOne(id);
 
-    if (!product)
-      throw new NotFoundException(this.i18n.t('events.product.NOT_FOUND'));
+    if (!product) throw new NotFoundException('events.product.NOT_FOUND');
     await this.checkOwnership(product, userId, userRole);
 
     await this.productRepo.remove(product);
@@ -211,7 +206,7 @@ export class ProductsService {
       where: { user: { id: userId } },
     });
     if (!vendorProfile || product.vendor.id !== vendorProfile.id) {
-      throw new ForbiddenException(this.i18n.t('events.product.NOT_OWNER'));
+      throw new ForbiddenException('events.product.NOT_OWNER');
     }
   }
 

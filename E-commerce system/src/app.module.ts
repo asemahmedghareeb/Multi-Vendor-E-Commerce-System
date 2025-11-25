@@ -118,7 +118,7 @@ import { Device } from './users/entities/device.entity';
             Refund,
             Wishlist,
             WishlistItem,
-            Device
+            Device,
           ],
         };
       },
@@ -233,6 +233,12 @@ import { Device } from './users/entities/device.entity';
     AnalyticsModule,
     WishlistModule,
     FcmModule,
+  ],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: I18nExceptionFilter,
+    },
   ],
 })
 export class AppModule {}

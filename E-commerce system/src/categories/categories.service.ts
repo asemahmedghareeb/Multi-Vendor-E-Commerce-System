@@ -10,15 +10,11 @@ import { CreateCategoryInput } from './dto/create-category.input';
 import { PaginationInput } from 'src/common/dto/pagination.input';
 import { IPaginatedType } from 'src/common/dto/paginated-output';
 import { UpdateCategoryInput } from './dto/update-category.input';
-import { I18nService } from 'nestjs-i18n';
-
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectRepository(Category) private categoryRepo: Repository<Category>,
-
-    private readonly i18n: I18nService,
   ) {}
 
   async create(input: CreateCategoryInput): Promise<Category> {
@@ -26,9 +22,7 @@ export class CategoriesService {
       where: { name: input.name },
     });
     if (exists) {
-      throw new BadRequestException(
-        this.i18n.t('events.category.ALREADY_EXISTS'),
-      );
+      throw new BadRequestException('events.category.ALREADY_EXISTS');
     }
     const category = this.categoryRepo.create({ name: input.name });
 
@@ -37,7 +31,7 @@ export class CategoriesService {
         where: { id: input.parentId },
       });
       if (!parent) {
-        throw new NotFoundException(this.i18n.t('events.category.NOT_FOUND'));
+        throw new NotFoundException('events.category.NOT_FOUND');
       }
       category.parent = parent;
     }
@@ -71,7 +65,7 @@ export class CategoriesService {
     });
 
     if (!category) {
-      throw new NotFoundException(this.i18n.t('events.category.NOT_FOUND'));
+      throw new NotFoundException('events.category.NOT_FOUND');
     }
     return category;
   }
@@ -79,7 +73,7 @@ export class CategoriesService {
   async update(id: string, input: UpdateCategoryInput): Promise<Category> {
     const category: Category | null = await this.findOne(id);
     if (!category) {
-      throw new NotFoundException(this.i18n.t('events.category.NOT_FOUND'));
+      throw new NotFoundException('events.category.NOT_FOUND');
     }
 
     if (input.parentId) {
@@ -87,9 +81,7 @@ export class CategoriesService {
         where: { id: input.parentId },
       });
       if (!parent) {
-        throw new NotFoundException(
-          this.i18n.t('events.category.PARENT_NOT_FOUND'),
-        );
+        throw new NotFoundException('events.category.PARENT_NOT_FOUND');
       }
       category.parent = parent;
     }
@@ -106,13 +98,10 @@ export class CategoriesService {
       where: { parent: { id } },
     });
     if (hasChildren > 0) {
-      throw new BadRequestException(
-        this.i18n.t('events.category.CANNOT_DELETE'),
-      );
+      throw new BadRequestException('events.category.CANNOT_DELETE');
     }
 
     await this.categoryRepo.remove(category);
     return true;
   }
-
 }
