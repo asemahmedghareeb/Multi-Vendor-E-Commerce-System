@@ -12,7 +12,7 @@ A full-featured, scalable e-commerce platform built with NestJS, GraphQL, and Ty
 - **User Authentication**: JWT-based authentication with role-based access
 - **Reviews & Ratings**: Product reviews and vendor ratings
 - **Wishlists**: Save favorite products
-- **Notifications**: Email notifications
+- **Notifications**: Email and push notifications 
 - **Analytics**: Sales and performance metrics
 - **Multi-language Support**: Internationalization ready
 
