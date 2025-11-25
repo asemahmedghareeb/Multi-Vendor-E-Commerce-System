@@ -21,7 +21,7 @@ A full-featured, scalable e-commerce platform built with NestJS, GraphQL, and Ty
 - **Backend**: NestJS
 - **API**: GraphQL
 - **Database**: PostgreSQL (with TypeORM)
-- **Authentication**: JWT, Passport.js
+- **Authentication**: JWT
 - **Caching**: Redis
 - **Background Jobs**: BullMQ
 - **Containerization**: Docker
