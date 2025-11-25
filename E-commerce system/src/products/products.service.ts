@@ -13,11 +13,11 @@ import { CreateProductInput } from './dto/create-product.input';
 import { Category } from '../categories/entities/category.entity';
 import { IPaginatedType } from 'src/common/dto/paginated-output';
 import { UpdateProductInput } from './dto/update-product.input';
-import { Role } from 'src/auth/guards/role.enum';
 import { GetProductsFilterInput } from './dto/products-filter.input';
 import { I18nService } from 'nestjs-i18n';
 import { PaginationInput } from 'src/common/dto/pagination.input';
 import { Follow } from 'src/follow/entities/follow.entity';
+import { Role } from 'src/auth/guards/role.enum';
 @Injectable()
 export class ProductsService {
   constructor(
