@@ -65,19 +65,4 @@ npm run start:dev
 # Production
 npm run start:prod
 
-src/
-├── analytics/        # Analytics and reporting
-├── auth/             # Authentication and authorization
-├── cart/             # Shopping cart functionality
-├── categories/       # Product categories
-├── common/           # Shared modules and utilities
-├── dataLoaders/      # GraphQL data loaders
-├── emails/           # Email templates and services
-├── notifications/    # Notification system
-├── orders/           # Order management
-├── payments/         # Payment processing
-├── products/         # Product management
-├── reviews/          # Product and vendor reviews
-├── users/            # User management
-├── vendors/          # Vendor management
-└── wallet/           # Wallet and transactions
+
