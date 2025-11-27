@@ -18,7 +18,7 @@ import { RegisterInput } from './dto/register.input';
 import { Vendor, VendorStatus } from 'src/vendors/entities/vendor.entity';
 import { UserRole } from 'src/common/enums/roles.enum';
 import { LoginInput } from './dto/login.input';
-
+import { Session } from './entities/session.entity';
 import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
@@ -29,6 +29,8 @@ export class AuthService {
     private userRepo: Repository<User>,
     @InjectRepository(Vendor)
     private vendorRepo: Repository<Vendor>,
+    @InjectRepository(Session) 
+    private sessionRepo: Repository<Session>,
     private jwtService: JwtService,
     private emailService: EmailsService,
   ) {

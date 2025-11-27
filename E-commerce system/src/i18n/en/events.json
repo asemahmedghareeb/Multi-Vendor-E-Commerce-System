@@ -51,7 +51,8 @@
     "ITEM_NOT_FOUND": "Order item not found",
     "PLACED": "Order placed successfully",
     "STATUS_UPDATED": "Order status updated to {status}",
-    "CANCELLED": "Order cancelled successfully"
+    "CANCELLED": "Order cancelled successfully",
+    "ORDER_STATUS_IS_THE_SAME": "Order Item status didn't changed"
   },
   "payment": {
     "NOT_FOUND": "Payment record not found",

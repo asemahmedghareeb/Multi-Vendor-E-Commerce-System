@@ -7,6 +7,7 @@ import { Wallet } from 'src/wallet/entities/wallet.entity';
 import { Wishlist } from 'src/wishlist/entities/wishlist.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Device } from './device.entity';
+import { Session } from 'src/auth/entities/session.entity';
 
 @ObjectType()
 @Entity('users')
@@ -38,9 +39,11 @@ export class User extends BaseEntity {
   @RelationId((user: User) => user.vendorProfile)
   vendorId?: string;
 
-  @OneToMany(() => Device, (device) => device.user)
+  @OneToMany(() => Device, (device) => device.user, { cascade: true })
   devices: Device[];
 
+  @OneToMany(() => Session, (session) => session.user, { cascade: true })
+  sessions: Session[];
   @Field()
   @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true })
   wallet: Wallet;

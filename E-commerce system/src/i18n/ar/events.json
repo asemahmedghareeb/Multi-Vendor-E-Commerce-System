@@ -51,7 +51,8 @@
     "ITEM_NOT_FOUND": "عنصر الطلب غير موجود",
     "PLACED": "تم تقديم الطلب بنجاح",
     "STATUS_UPDATED": "تم تحديث حالة الطلب إلى {status}",
-    "CANCELLED": "تم إلغاء الطلب بنجاح"
+    "CANCELLED": "تم إلغاء الطلب بنجاح",
+    "ORDER_STATUS_IS_THE_SAME":"لم يتم تحديث حالة الطلب"
   },
   "payment": {
     "NOT_FOUND": "سجل الدفع غير موجود",

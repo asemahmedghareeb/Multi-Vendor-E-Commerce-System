@@ -58,6 +58,7 @@ import { Wishlist } from './wishlist/entities/wishlist.entity';
 import { WishlistItem } from './wishlist/entities/wishlist-item.entity';
 import { FcmModule } from './fcm/fcm.module';
 import { Device } from './users/entities/device.entity';
+import { Session } from './auth/entities/session.entity';
 @Module({
   imports: [
     I18nModule.forRoot({
@@ -119,6 +120,7 @@ import { Device } from './users/entities/device.entity';
             Wishlist,
             WishlistItem,
             Device,
+            Session,
           ],
         };
       },
@@ -148,7 +150,6 @@ import { Device } from './users/entities/device.entity';
       formatError: (formattedError, error: any) => {
         const originalError = error.originalError;
 
-        // 1. Fast exit for non-NestJS errors (Syntax, Type Errors, etc.)
         if (!originalError) {
           return {
             message: formattedError.message,
@@ -158,13 +159,11 @@ import { Device } from './users/entities/device.entity';
           };
         }
 
-        // 2. Variables to hold extracted data
         let message = originalError.message || formattedError.message;
         let statusCode = 500;
         let errorType = 'Internal Server Error';
         let allMessages = undefined;
 
-        // 3. Handle NestJS Exceptions (Standard & I18nFilter)
         if (originalError.response) {
           const response = originalError.response;
           statusCode = originalError.status || 400;
