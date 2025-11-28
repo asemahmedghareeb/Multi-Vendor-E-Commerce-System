@@ -2,7 +2,6 @@ import { EmailsService } from 'src/emails/emails.service';
 import { Process, Processor } from '@nestjs/bull';
 import bull from 'bull';
 
-
 @Processor('notification')
 export class NotificationsProcessor {
   constructor(private emailsService: EmailsService) {}
