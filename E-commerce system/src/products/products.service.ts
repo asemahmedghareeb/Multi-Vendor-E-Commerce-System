@@ -4,8 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-
-import { Brackets, Repository } from 'typeorm';
+import {
+  Between,
+  FindOptionsWhere,
+  ILike,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { Vendor } from '../vendors/entities/vendor.entity';
 import { Product } from './entities/product.entity';
 import { CreateProductInput } from './dto/create-product.input';
@@ -13,7 +19,6 @@ import { Category } from '../categories/entities/category.entity';
 import { IPaginatedType } from 'src/common/dto/paginated-output';
 import { UpdateProductInput } from './dto/update-product.input';
 import { GetProductsFilterInput } from './dto/products-filter.input';
-
 import { PaginationInput } from 'src/common/dto/pagination.input';
 import { Follow } from 'src/follow/entities/follow.entity';
 import { Role } from 'src/auth/guards/role.enum';
@@ -91,49 +96,55 @@ export class ProductsService {
       page,
       limit,
       search,
-      categoryId,
+      vendorName,
       categoryName,
       minPrice,
       maxPrice,
     } = input;
+
     const skip = (page - 1) * limit;
 
-    const qb = this.productRepo.createQueryBuilder('product');
-
-    if (categoryName) {
-      qb.leftJoin('product.category', 'category');
-      qb.andWhere('category.name ILIKE :categoryName', {
-        categoryName: `%${categoryName}%`,
-      });
-    }
-
-    if (search) {
-      qb.andWhere(
-        new Brackets((sub) => {
-          sub
-            .where('product.name ILIKE :search', { search: `%${search}%` })
-            .orWhere('product.description ILIKE :search', {
-              search: `%${search}%`,
-            });
-        }),
-      );
-    }
-
-    if (categoryId) {
-      qb.andWhere('product.categoryId = :categoryId', { categoryId });
-    }
+    const baseWhere: FindOptionsWhere<Product> = {};
 
     if (minPrice !== undefined) {
-      qb.andWhere('product.price >= :minPrice', { minPrice: minPrice * 100 });
-    }
-    if (maxPrice !== undefined) {
-      qb.andWhere('product.price <= :maxPrice', { maxPrice: maxPrice * 100 });
+      baseWhere.price = MoreThanOrEqual(minPrice * 100);
     }
 
-    qb.orderBy('product.createdAt', 'DESC');
-    qb.skip(skip).take(limit);
+    if (maxPrice !== undefined && minPrice !== undefined) {
+      baseWhere.price = baseWhere.price
+        ? Between(minPrice * 100, maxPrice * 100)
+        : LessThanOrEqual(maxPrice * 100);
+    }
 
-    const [items, totalItems] = await qb.getManyAndCount();
+    if (vendorName) {
+      baseWhere.vendor = {
+        businessName: ILike(`%${vendorName}%`),
+      };
+    }
+
+    if (categoryName) {
+      baseWhere.category = {
+        name: ILike(`%${categoryName}%`),
+      };
+    }
+
+    let finalWhere: FindOptionsWhere<Product> | FindOptionsWhere<Product>[];
+
+    if (search) {
+      finalWhere = [
+        { ...baseWhere, name: ILike(`%${search}%`) },
+        { ...baseWhere, description: ILike(`%${search}%`) },
+      ];
+    } else {
+      finalWhere = baseWhere;
+    }
+
+    const [items, totalItems] = await this.productRepo.findAndCount({
+      where: finalWhere,
+      skip,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
 
     return {
       items,

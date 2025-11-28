@@ -4,7 +4,6 @@ import { BaseEntity } from '../../common/entities/base.entity';
 import { OrderItem } from './order-item.entity';
 import { OrderStatus } from '../enum/order-status.enum';
 
-
 @ObjectType()
 @Entity('order_tracking')
 export class OrderTracking extends BaseEntity {

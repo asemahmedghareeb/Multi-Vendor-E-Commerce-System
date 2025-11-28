@@ -1,10 +1,9 @@
 import { Global, Module } from '@nestjs/common';
 import { EmailsService } from './emails.service';
-import { FlightEmailProcessor } from './flight-email.processor';
-
+import { EmailsProcessor } from './email.processor';
 @Global()
 @Module({
-  providers: [EmailsService, FlightEmailProcessor],
+  providers: [EmailsService, EmailsProcessor],
   controllers: [],
   exports: [EmailsService],
 })

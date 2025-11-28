@@ -8,7 +8,6 @@ import { CreateProductInput } from './dto/create-product.input';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { genericPaginated } from 'src/common/dto/paginated-output';
-
 import { UpdateProductInput } from './dto/update-product.input';
 import { GetProductsFilterInput } from './dto/products-filter.input';
 import { Vendor } from 'src/vendors/entities/vendor.entity';

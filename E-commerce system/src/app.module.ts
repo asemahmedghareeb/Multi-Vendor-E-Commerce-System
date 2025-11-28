@@ -58,6 +58,7 @@ import { Wishlist } from './wishlist/entities/wishlist.entity';
 import { WishlistItem } from './wishlist/entities/wishlist-item.entity';
 import { FcmModule } from './fcm/fcm.module';
 import { Device } from './users/entities/device.entity';
+import { Session } from './auth/entities/session.entity';
 @Module({
   imports: [
     I18nModule.forRoot({
@@ -119,6 +120,7 @@ import { Device } from './users/entities/device.entity';
             Wishlist,
             WishlistItem,
             Device,
+            Session,
           ],
         };
       },

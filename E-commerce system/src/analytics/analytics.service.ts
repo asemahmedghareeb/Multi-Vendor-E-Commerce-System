@@ -120,5 +120,4 @@ export class AnalyticsService {
     ) as Vendor[];
     //   .filter((v) => !!v) as Vendor[];
   }
-
 }

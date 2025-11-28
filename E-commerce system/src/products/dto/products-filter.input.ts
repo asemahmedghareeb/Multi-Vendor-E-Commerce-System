@@ -11,13 +11,18 @@ export class GetProductsFilterInput extends PaginationInput {
 
   @Field(() => Int, { nullable: true })
   @IsOptional()
-  @IsInt()
-  categoryId?: number;
+  @IsString()
+  categoryId?: string;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
   categoryName?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  vendorName?: string;
 
   @Field(() => Float, { nullable: true })
   @IsOptional()

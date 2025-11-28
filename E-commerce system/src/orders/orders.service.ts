@@ -88,32 +88,44 @@ export class OrdersService {
     if (!cart.items || cart.items.length === 0) {
       throw new BadRequestException('events.cart.EMPTY');
     }
+    const sortedCartItems = cart.items.sort((a, b) =>
+      a.productId.localeCompare(b.productId),
+    );
 
     let totalAmount = 0;
     const orderItemsToCreate: OrderItem[] = [];
 
-    for (const item of cart.items) {
-      if (item.product.inventoryCount < item.quantity) {
+    for (const item of sortedCartItems) {
+      const product = await this.productRepo.findOne({
+        where: { id: item.productId },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!product) {
+        throw new NotFoundException(`Product ${item.productId} not found`);
+      }
+
+      if (product.inventoryCount < item.quantity) {
         throw new BadRequestException({
           key: 'events.product.INSUFFICIENT_INVENTORY',
-          args: { count: item.product.inventoryCount },
+          args: { count: product.inventoryCount },
         });
       }
 
-      totalAmount += item.product.price * item.quantity;
+      totalAmount += product.price * item.quantity;
 
       const orderItem = this.orderItemRepo.create({
-        product: item.product,
-        vendor: item.product.vendor,
+        product: product,
+        vendor: product.vendor,
         quantity: item.quantity,
-        priceAtPurchase: item.product.price,
+        priceAtPurchase: product.price,
         status: OrderStatus.PENDING,
       });
 
       orderItemsToCreate.push(orderItem);
 
       await this.productRepo.decrement(
-        { id: item.product.id },
+        { id: product.id },
         'inventoryCount',
         item.quantity,
       );
@@ -142,7 +154,6 @@ export class OrdersService {
     });
 
     await this.orderTrackingRepo.save(trackingRecords);
-
     await this.cartItemRepo.delete({ cart: { id: cart.id } });
 
     await this.paymentsService.createPaymentIntent(savedOrder);
@@ -198,15 +209,19 @@ export class OrdersService {
     itemId: string,
     newStatus: OrderStatus,
   ): Promise<OrderItem> {
- const item = await this.orderItemRepo.findOne({
+    const item = await this.orderItemRepo.findOne({
       where: { id: itemId },
-      relations: ['vendor', 'vendor.user', 'order'], 
+      relations: ['vendor', 'vendor.user', 'order'],
     });
 
     if (!item) throw new NotFoundException('events.order.ITEM_NOT_FOUND');
 
     if (item.vendor.userId !== user.userId && user.role !== 'SUPER_ADMIN') {
       throw new ForbiddenException('events.vendor.NOT_OWNER');
+    }
+
+    if (item.status === newStatus) {
+      throw new BadRequestException('events.order.ORDER_STATUS_IS_THE_SAME');
     }
 
     item.status = newStatus;
