@@ -32,9 +32,9 @@ import { Device } from 'src/users/entities/device.entity';
     ]),
     CartModule,
     PaymentsModule,
-    DataLoadersModule
+    DataLoadersModule,
   ],
-  providers: [OrdersResolver, OrdersService,OrderItemResolver],
+  providers: [OrdersResolver, OrdersService, OrderItemResolver],
   exports: [OrdersService],
 })
 export class OrdersModule {}
