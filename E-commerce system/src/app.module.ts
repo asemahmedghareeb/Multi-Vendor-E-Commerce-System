@@ -150,6 +150,7 @@ import { Session } from './auth/entities/session.entity';
       formatError: (formattedError, error: any) => {
         const originalError = error.originalError;
 
+
         if (!originalError) {
           return {
             message: formattedError.message,
