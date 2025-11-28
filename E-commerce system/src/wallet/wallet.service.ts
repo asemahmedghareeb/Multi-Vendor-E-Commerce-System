@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Wallet } from './entities/wallet.entity';
 import {
@@ -12,6 +16,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserRole } from 'src/common/enums/roles.enum';
 import { OrderItem } from 'src/orders/entities/order-item.entity';
 import { Vendor } from 'src/vendors/entities/vendor.entity';
+import { PayoutInput } from './entities/payout.input';
 
 @Injectable()
 export class WalletsService {
@@ -183,5 +188,41 @@ export class WalletsService {
       orderItem.refundedQuantity += quantity;
       await this.orderItemRepo.save(orderItem);
     }
+  }
+
+  @Transactional()
+  async executePayout(input: PayoutInput): Promise<WalletTransaction> {
+    const vendor = await this.vendorRepo.findOne({
+      where: { id: input.vendorId },
+      relations: ['user', 'user.wallet'],
+    });
+
+    if (!vendor || !vendor.user?.wallet) {
+      throw new NotFoundException('events.vendor.NOT_FOUND');
+    }
+
+    const wallet = vendor.user.wallet;
+    const payoutAmountCents = input.amount * 100;
+
+    if (wallet.balance < payoutAmountCents) {
+      throw new BadRequestException({
+        key: 'events.wallet.INSUFFICIENT_FUNDS',
+        args: { currentBalance: wallet.balance / 100 },
+      });
+    }
+
+    wallet.balance -= payoutAmountCents;
+    await this.walletRepo.save(wallet);
+
+    const tx = this.txRepo.create({
+      wallet: wallet,
+      amount: -payoutAmountCents,
+      type: TransactionType.PAYOUT,
+      description: `Payout of $${input.amount} to Vendor ${vendor.businessName}`,
+    });
+
+    const savedTx = await this.txRepo.save(tx);
+
+    return savedTx;
   }
 }

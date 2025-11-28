@@ -9,7 +9,7 @@ interface FlightEmailJob {
 }
 
 @Processor('email')
-export class FlightEmailProcessor {
+export class EmailsProcessor {
   constructor(private readonly emailsService: EmailsService) {}
 
   @Process('send-status-email')

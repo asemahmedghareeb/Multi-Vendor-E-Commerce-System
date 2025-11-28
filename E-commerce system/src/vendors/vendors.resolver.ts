@@ -71,15 +71,15 @@ export class UsersResolver {
   }
 
 
-  @ResolveField(() => paginatedProduct)
-  async products(
-    @Parent() vendor: Vendor,
-    @Args('pagination', { nullable: true }) pagination?: PaginationInput,
-  ) {
-    const input = pagination || { page: 1, limit: 10 };
+  // @ResolveField(() => paginatedProduct)
+  // async products(
+  //   @Parent() vendor: Vendor,
+  //   @Args('pagination', { nullable: true }) pagination?: PaginationInput,
+  // ) {
+  //   const input = pagination || { page: 1, limit: 10 };
 
-    return this.productsService.findAllByVendor(vendor.id, input);
-  }
+  //   return this.productsService.findAllByVendor(vendor.id, input);
+  // }
 
   
   @ResolveField(() => [OrderItem])

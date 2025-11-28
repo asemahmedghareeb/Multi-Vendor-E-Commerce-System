@@ -6,9 +6,12 @@ import {
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
+
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+  ) {}
   canActivate(context: ExecutionContext): boolean {
     const gqlCtx = GqlExecutionContext.create(context);
     const ctx = gqlCtx.getContext();
@@ -23,7 +26,6 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Bad authorization header');
 
     const token = parts[1];
-
     try {
       const payload = this.jwtService.verify(token);
       console.log(payload);

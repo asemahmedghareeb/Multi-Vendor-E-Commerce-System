@@ -3,11 +3,11 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { UserRole } from '../../common/enums/roles.enum';
 import { Vendor } from '../../vendors/entities/vendor.entity';
-import { Wallet } from 'src/wallet/entities/wallet.entity';
-import { Wishlist } from 'src/wishlist/entities/wishlist.entity';
-import { Cart } from 'src/cart/entities/cart.entity';
+import { Wishlist } from '../../wishlist/entities/wishlist.entity';
+import { Cart } from '../../cart/entities/cart.entity';
 import { Device } from './device.entity';
-import { Session } from 'src/auth/entities/session.entity';
+import { Session } from '../../auth/entities/session.entity';
+import { Wallet } from 'src/wallet/entities/wallet.entity';
 
 @ObjectType()
 @Entity('users')
@@ -32,6 +32,12 @@ export class User extends BaseEntity {
   @Column({ default: false })
   isVerified: boolean;
 
+  @Column({ type: 'varchar', nullable: true, select: false })
+  passwordResetToken: string | null;
+
+  @Column({ nullable: true, type: 'timestamp' })
+  passwordResetExpires: Date | null;
+
   @Field(() => Vendor, { nullable: true })
   @OneToOne(() => Vendor, (vendor) => vendor.user, { nullable: true })
   vendorProfile?: Vendor;
@@ -44,15 +50,16 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Session, (session) => session.user, { cascade: true })
   sessions: Session[];
-  @Field()
+
+  @Field(() => Wallet, { nullable: true })
   @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true })
   wallet: Wallet;
 
-  @Field()
+  @Field(() => Cart, { nullable: true })
   @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
 
-  @Field()
+  @Field(() => Wishlist, { nullable: true })
   @OneToOne(() => Wishlist, (wishlist) => wishlist.user)
   wishlist: Wishlist;
 }

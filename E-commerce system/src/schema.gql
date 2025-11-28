@@ -115,29 +115,32 @@ type Order {
   payment: Payment
 }
 
-type WalletTransaction {
+type Review {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  amount: Float!
-  type: TransactionType!
-  description: String!
+  rating: Int!
+  comment: String!
+  user: User!
+  vendor: Vendor!
+  order: Order!
 }
 
-enum TransactionType {
-  DEPOSIT
-  SALE
-  COMMISSION
-  PAYOUT
-  REFUND
-}
-
-type Wallet {
+type Vendor {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  balance: Float!
-  transactions: [WalletTransaction!]!
+  businessName: String!
+  bio: String!
+  status: String!
+  commissionRate: Float!
+  averageRating: Float!
+  reviewsCount: Int!
+  followersCount: Int!
+  totalSales: Int!
+  user: User!
+  orders: [OrderItem!]!
+  reviews: [Review!]!
 }
 
 type WishlistItem {
@@ -176,6 +179,40 @@ type Cart {
   totalAmount: Float!
 }
 
+type Session {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deviceName: String!
+  expiresAt: DateTime!
+  user: User!
+}
+
+type WalletTransaction {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  amount: Float!
+  type: TransactionType!
+  description: String!
+}
+
+enum TransactionType {
+  DEPOSIT
+  SALE
+  COMMISSION
+  PAYOUT
+  REFUND
+}
+
+type Wallet {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  balance: Float!
+  transactions: [WalletTransaction!]!
+}
+
 type User {
   id: ID!
   createdAt: DateTime!
@@ -183,44 +220,15 @@ type User {
   email: String!
   role: UserRole!
   vendorProfile: Vendor
-  wallet: Wallet!
-  cart: Cart!
-  wishlist: Wishlist!
+  wallet: Wallet
+  cart: Cart
+  wishlist: Wishlist
 }
 
 enum UserRole {
   SUPER_ADMIN
   VENDOR
   CLIENT
-}
-
-type Review {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  rating: Int!
-  comment: String!
-  user: User!
-  vendor: Vendor!
-  order: Order!
-}
-
-type Vendor {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  businessName: String!
-  bio: String!
-  status: String!
-  commissionRate: Float!
-  averageRating: Float!
-  reviewsCount: Int!
-  followersCount: Int!
-  totalSales: Int!
-  user: User!
-  orders: [OrderItem!]!
-  reviews: [Review!]!
-  products(pagination: PaginationInput): PaginatedProductOutput!
 }
 
 type AuthResponse {
@@ -280,6 +288,7 @@ type PaginatedReviewOutput {
 }
 
 type Query {
+  mySessions: [Session!]!
   feed(pagination: PaginationInput): PaginatedProductOutput!
   products(filter: GetProductsFilterInput): PaginatedProductOutput!
   product(id: String!): Product!
@@ -309,6 +318,7 @@ input GetProductsFilterInput {
   search: String
   categoryId: Int
   categoryName: String
+  vendorName: String
   minPrice: Float
   maxPrice: Float
 }
@@ -322,14 +332,20 @@ input GetAnalyticsInput {
 type Mutation {
   register(input: RegisterInput!): User!
   login(input: LoginInput!): AuthResponse!
+  logout(sessionId: String): Boolean!
+  logoutAllDevices: Boolean!
   refreshToken: AuthResponse!
   verifyOtp(input: VerifyOtpInput!): AuthResponse!
   resendOtp(input: ResendOtpInput!): RegisterResponse!
+  forgotPassword(email: String!): Boolean!
+  resetPassword(input: ResetPasswordInput!): Boolean!
+  loginWithGoogle(input: GoogleLoginInput!): AuthResponse!
   createProduct(createProductInput: CreateProductInput!): Product!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   removeProduct(id: String!): Boolean!
   refundItems(input: CreateRefundInput!): Refund!
   refundFullOrder(paymentId: String!, reason: String): Refund!
+  adminPayoutVendor(input: PayoutInput!): WalletTransaction!
   createOrder(input: CreateOrderInput!): Order!
   updateItemStatus(itemId: String!, status: OrderStatus!): OrderItem!
   addToCart(input: AddToCartInput!): Cart!
@@ -375,6 +391,15 @@ input ResendOtpInput {
   email: String!
 }
 
+input ResetPasswordInput {
+  token: String!
+  newPassword: String!
+}
+
+input GoogleLoginInput {
+  token: String!
+}
+
 input CreateProductInput {
   name: String!
   description: String!
@@ -403,6 +428,11 @@ input CreateRefundInput {
 input RefundItemInput {
   orderItemId: String!
   quantity: Int!
+}
+
+input PayoutInput {
+  vendorId: String!
+  amount: Float!
 }
 
 input CreateOrderInput {
